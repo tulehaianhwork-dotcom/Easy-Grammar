@@ -228,6 +228,28 @@ textarea.code{width:100%;min-height:84px;border:1px solid var(--line);border-rad
 
 .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:.9375rem;z-index:30;max-width:90vw;text-align:center}
 @media (min-width:861px){.toast{bottom:28px}}
+.toast.link{cursor:pointer}
+.banners{margin-bottom:16px}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff4c2;border:1px solid #ecd978;border-radius:12px;padding:12px 16px;margin-bottom:10px}
+.banner.info{background:var(--accent-bg);border-color:#c3d0f5}
+.ask{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1.5px dashed #aab6d3;border-radius:12px;padding:14px 16px;margin:14px 0 0}
+.ask div{display:flex;flex-direction:column;gap:2px}
+.ask span{color:var(--ink-2);font-size:.875rem}
+.qa-i{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.qa-i.new{border-color:var(--accent);box-shadow:inset 4px 0 0 var(--accent)}
+.qa-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.qa-q{white-space:pre-wrap;margin:8px 0 10px}
+.qa-a{background:var(--ok-bg);border:1px solid #b6dcc9;border-radius:10px;padding:10px 12px;margin-top:6px}
+.qa-a small{color:var(--ok);font-weight:600}
+.qa-a p{white-space:pre-wrap;margin:4px 0 0}
+.swrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+.swrow:last-of-type{border-bottom:0}
+.swrow small{display:block;color:var(--ink-2);font-size:.8125rem;line-height:1.45;margin-top:2px;font-weight:400}
+input.sw{-webkit-appearance:none;appearance:none;flex:none;width:46px;height:26px;border-radius:13px;background:#b9c3da;position:relative;cursor:pointer;border:0;transition:background .15s}
+input.sw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .15s}
+input.sw:checked{background:var(--accent)}
+input.sw:checked::after{transform:translateX(20px)}
+.timeinp{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;background:#fff;color:var(--ink)}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
@@ -1607,7 +1629,7 @@ TESTS[0].quiz.push(
   Q(`The students listened ___ to the lecture.`, [`attentive`, `attentively`, `attention`, `attend`], 1, `Từ bổ nghĩa cho động từ listened là trạng từ: attentively.`),
   Q(`He looks ___ after the long trip.`, [`tired`, `tiredly`, `tire`, `tiring`], 0, `Look là động từ liên kết nên sau nó dùng tính từ: tired.`),
   ERR(`My sister`, [`speaks`, `English`, `very`, `good`], `.`, 3, `Từ bổ nghĩa cho động từ speaks phải là trạng từ: well.`),
-  Q(`Two ___ were waiting outside.`, [`man`, `mans`, `men`, `mens`], 2, `Man có số nhiều bất quy tắc là men.`),
+  Q(`They bought some new ___ for the living room.`, [`furniture`, `furnitures`, `a furniture`, `furnishes`], 0, `Furniture là danh từ không đếm được nên không thêm s và không dùng a.`),
   Q(`The new ___ in the lab is very expensive.`, [`equipments`, `equipment`, `an equipment`, `equipmentes`], 1, `Equipment là danh từ không đếm được nên không thêm s và không dùng an.`),
   Q(`She is ___ university student.`, [`a`, `an`, `the`, `(không dùng mạo từ)`], 0, `University bắt đầu bằng âm /j/ là một phụ âm nên dùng a.`),
   ERR(``, [`Its`, `a`, `sunny`, `day`], ` today.`, 0, `Cần It's (it is), không phải its (tính từ sở hữu).`),
@@ -1734,7 +1756,7 @@ TESTS[5].quiz.push(
   Q(`The room ___ when I arrived.`, [`was being cleaned`, `is being cleaned`, `cleaned`, `has cleaned`], 0, `Việc đang diễn ra trong quá khứ ở dạng bị động: was being + V3.`),
   ERR(`The`, [`letter`, `was`, `wrote`, `by my mother`], `.`, 2, `Bị động cần V3: was written.`),
   Q(`You ___ wear a seatbelt. It is the law.`, [`must`, `might`, `could`, `would`], 0, `Must diễn tả nghĩa vụ mạnh.`),
-  Q(`___ you help me with this bag, please?`, [`Could`, `Must`, `Should have`, `Might have`], 0, `Could dùng cho lời đề nghị lịch sự.`),
+  Q(`___ you like some tea?`, [`Would`, `Must`, `Should have`, `Might have`], 0, `Would dùng cho lời đề nghị lịch sự: Would you like some tea?`),
   Q(`He didn't answer the phone. He ___ asleep.`, [`must have been`, `must be been`, `should been`, `can't been`], 0, `Suy luận gần như chắc chắn về quá khứ: must have been.`),
   Q(`We ___ have stayed longer, but we had to leave.`, [`could`, `must`, `can't`, `should to`], 0, `Đã có thể làm nhưng không làm: could have + V3.`),
   Q(`You ___ shouted at him. It was rude.`, [`shouldn't have`, `shouldn't`, `mightn't`, `can't be`], 0, `Lẽ ra không nên làm: shouldn't have + V3.`)
@@ -1760,12 +1782,13 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const validDay = d => typeof d === 'string' && DATE_RE.test(d) && !isNaN(Date.parse(d));
-let toastTimer;
-function toast(m) {
+let toastTimer, toastTo = null;
+function toast(m, ms = 3200, to = null) {
   const t = $('#toast');
-  t.textContent = m; t.hidden = false;
+  t.textContent = m; t.hidden = false; toastTo = to;
+  t.classList.toggle('link', !!to);
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+  toastTimer = setTimeout(() => { t.hidden = true; toastTo = null; }, ms);
 }
 
 /* ===================== DỮ LIỆU BÀI ===================== */
@@ -1830,27 +1853,57 @@ const FirebaseBackend = {
   async load(uid) { const d = await this.db.collection('progress').doc(uid).get(); return d.exists ? d.data() : null; },
   save(uid, data) { return this.db.collection('progress').doc(uid).set(data); },
   stamp() { return firebase.firestore.FieldValue.serverTimestamp(); },
-  subscribeStudents(cb) { return this.db.collection('progress').onSnapshot(snap => cb(snap.docs.map(d => d.data())), err => cb(null, err)); }
+  subscribeStudents(cb) { return this.db.collection('progress').onSnapshot(snap => cb(snap.docs.map(d => d.data())), err => cb(null, err)); },
+  /* Hỏi đáp: học viên chỉ đọc câu hỏi của mình, giáo viên đọc tất cả */
+  addQuestion(q) { return this.db.collection('questions').add(q); },
+  updateQuestion(id, patch) { return this.db.collection('questions').doc(id).update(patch); },
+  subscribeQuestions(role, uid, cb) {
+    const col = this.db.collection('questions');
+    const ref = role === 'admin' ? col : col.where('uid', '==', uid);
+    return ref.onSnapshot(snap => cb(snap.docs.map(d => Object.assign({ id: d.id }, d.data()))), err => cb(null, err));
+  }
 };
 
 /* Chế độ xem thử: dùng khi chưa dán cấu hình Firebase. Dữ liệu chỉ lưu trong trình duyệt này. */
 const PreviewBackend = {
-  mode: 'preview', K: 'eg_preview_v1', cb: null, rcb: null,
-  read() { try { const r = JSON.parse(localStorage.getItem(this.K)); if (r && r.docs) return r; } catch (e) {} return { session: null, docs: {} }; },
+  mode: 'preview', K: 'eg_preview_v1', cb: null, rcb: null, qsub: null,
+  read() { try { const r = JSON.parse(localStorage.getItem(this.K)); if (r && r.docs) { r.questions = r.questions || []; return r; } } catch (e) {} return { session: null, docs: {}, questions: [] }; },
   write(s) { try { localStorage.setItem(this.K, JSON.stringify(s)); } catch (e) {} },
-  init(cb) { this.cb = cb; const s = this.read(); cb(s.session ? { uid: s.session, user: s.session } : null); },
+  init(cb) {
+    this.cb = cb; const s = this.read(); cb(s.session ? { uid: s.session, user: s.session } : null);
+    window.addEventListener('storage', e => { if (e.key === this.K) { this.qNotify(); if (this.rcb) this.rcb(Object.values(this.read().docs)); } });
+  },
   previewLogin(user) { const s = this.read(); s.session = user; this.write(s); this.cb({ uid: user, user }); },
   async logout() { const s = this.read(); s.session = null; this.write(s); this.cb(null); },
   async load(uid) { return this.read().docs[uid] || null; },
   async save(uid, data) { const s = this.read(); s.docs[uid] = data; this.write(s); },
   stamp() { return Date.now(); },
   subscribeStudents(cb) { this.rcb = cb; cb(Object.values(this.read().docs)); return () => { this.rcb = null; }; },
+  qList(role, uid) { const all = this.read().questions; return (role === 'admin' ? all : all.filter(q => q.uid === uid)).map(q => Object.assign({}, q)); },
+  qNotify() { if (this.qsub) this.qsub.cb(this.qList(this.qsub.role, this.qsub.uid)); },
+  async addQuestion(q) {
+    const s = this.read();
+    s.questions.push(Object.assign({ id: 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) }, q));
+    this.write(s); this.qNotify();
+  },
+  async updateQuestion(id, patch) {
+    const s = this.read(), q = s.questions.find(x => x.id === id);
+    if (!q) throw new Error('missing');
+    Object.assign(q, patch); this.write(s); this.qNotify();
+  },
+  subscribeQuestions(role, uid, cb) { this.qsub = { role, uid, cb }; this.qNotify(); return () => { this.qsub = null; }; },
   seedDemo() {
     const s = this.read();
     s.docs.hocvien1 = { user: 'hocvien1', units: { u4: { best: 8 }, u5: { best: 7 }, u6: { best: 6 }, u7: { best: 4 }, u9: { best: 5 }, u10: { best: 3 }, _days: [day(-1), day(-2), day(-4)] }, tests: { t1: { best: 18 } }, wrong: ['u7:1', 'u7:5', 'u10:2', 't1:4', 't1:9'], updated: Date.now() };
     s.docs.hocvien2 = { user: 'hocvien2', units: { u4: { best: 6 }, _days: [day(-3)] }, tests: { t1: { best: 14 } }, wrong: ['t1:0', 't1:5', 't1:11', 'u4:7'], updated: Date.now() };
+    s.questions = s.questions.filter(q => !/^qdemo/.test(q.id));
+    s.questions.push(
+      { id: 'qdemo1', uid: 'hocvien1', user: 'hocvien1', unit: 'u7', unitTitle: 'Giới từ và liên từ', text: 'Em chưa hiểu khi nào dùng yet, khi nào dùng but ạ?', created: Date.now() - 3600e3, reply: '', replied: null, seenByAdmin: false, seenByStudent: true },
+      { id: 'qdemo2', uid: 'hocvien2', user: 'hocvien2', unit: 'u4', unitTitle: 'Từ loại và vị trí trong câu', text: 'Em phân biệt tính từ và trạng từ thế nào cho nhanh ạ?', created: Date.now() - 86400e3, reply: 'Nhìn từ đứng ngay sau chỗ trống: bổ nghĩa cho động từ thì dùng trạng từ, bổ nghĩa cho danh từ thì dùng tính từ.', replied: Date.now() - 80000e3, seenByAdmin: true, seenByStudent: false }
+    );
     this.write(s);
     if (this.rcb) this.rcb(Object.values(s.docs));
+    this.qNotify();
   }
 };
 const Backend = CONFIGURED ? FirebaseBackend : PreviewBackend;
@@ -1858,6 +1911,8 @@ let bootError = '';
 
 /* ===================== PHIÊN ĐĂNG NHẬP & LƯU TIẾN ĐỘ ===================== */
 let ME = null, S = null, ROSTER = {}, unsubRoster = null, authMsg = '';
+let QA = [], qaPrev = {}, qaBase = false, qaWarned = false, unsubQA = null, remindTimer = null, SET = null;
+const drafts = {};   /* nội dung đang gõ dở (câu hỏi, câu trả lời) để không mất khi trang tự cập nhật */
 let view = { name: 'auth' };
 let saveTimer = null;
 
@@ -1880,9 +1935,15 @@ async function doSave() {
 async function doLogout() { if (saveTimer) await doSave(); try { await Backend.logout(); } catch (e) {} }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && saveTimer) doSave(); });
 
+function stopSession() {
+  if (unsubRoster) { unsubRoster(); unsubRoster = null; }
+  if (unsubQA) { unsubQA(); unsubQA = null; }
+  clearInterval(remindTimer); remindTimer = null;
+  QA = []; qaPrev = {}; qaBase = false; qaWarned = false; SET = null;
+}
 async function onAuth(u) {
   clearTimeout(saveTimer);
-  if (unsubRoster) { unsubRoster(); unsubRoster = null; }
+  stopSession();
   if (!u) { ME = null; S = null; ROSTER = {}; view = { name: 'auth' }; render(); return; }
   const user = String(u.user || '').toLowerCase();
   const role = user === ADMIN_USER ? 'admin' : 'student';
@@ -1896,7 +1957,10 @@ async function onAuth(u) {
     return;
   }
   ME = me;
+  SET = loadSettings(me.uid, role);
   if (role === 'admin') startRoster();
+  try { unsubQA = Backend.subscribeQuestions(role, me.uid, onQA); } catch (e) { onQA(null, e); }
+  if (role === 'student') { checkReminder(); remindTimer = setInterval(checkReminder, 30000); }
   go({ name: role === 'admin' ? 'students' : 'dash' });
 }
 
@@ -1928,6 +1992,91 @@ function partLocked(pt) {
   if (i <= 0) return false;
   const t = partTest(PARTS[i - 1]);
   return !!t && !testPassed(S, t);
+}
+
+/* ===================== CÂU HỎI CHO GIÁO VIÊN VÀ THÔNG BÁO ===================== */
+const MAX_PENDING = 5;   /* mỗi học viên tối đa 5 câu hỏi đang chờ trả lời */
+const nameOf = u => (ACCOUNTS[u] && ACCOUNTS[u].name) || u;
+const tsMs = v => (v && typeof v.toMillis === 'function') ? v.toMillis() : (typeof v === 'number' ? v : Date.now());
+const fmtTime = ms => new Date(ms).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+function cleanQ(d) {
+  const unit = U(d.unit) ? d.unit : '';
+  return {
+    id: String(d.id || ''), uid: String(d.uid || ''),
+    user: String(d.user || '').toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 20),
+    unit, unitTitle: unit ? U(unit).title : String(d.unitTitle || '').slice(0, 120),
+    text: String(d.text || '').slice(0, 1000),
+    created: tsMs(d.created),
+    reply: String(d.reply || '').slice(0, 2000),
+    replied: d.reply ? tsMs(d.replied) : 0,
+    seenByStudent: d.seenByStudent !== false
+  };
+}
+const unreadReplies = () => QA.filter(q => q.reply && !q.seenByStudent).length;
+const pendingQ = () => QA.filter(q => !q.reply).length;
+
+/* Cài đặt thông báo: lưu theo từng tài khoản trên từng thiết bị */
+const SETKEY = uid => 'eg_settings_' + uid;
+const defaultSettings = role => ({ browser: false, notifyReply: true, notifyQuestion: true, remind: role === 'student', remindTime: '20:00', lastRemind: '' });
+function loadSettings(uid, role) {
+  try { const r = JSON.parse(localStorage.getItem(SETKEY(uid))); const d = Object.assign(defaultSettings(role), r || {}); if (!/^\d{2}:\d{2}$/.test(d.remindTime)) d.remindTime = '20:00'; return d; }
+  catch (e) { return defaultSettings(role); }
+}
+function saveSettings() { try { localStorage.setItem(SETKEY(ME.uid), JSON.stringify(SET)); } catch (e) {} }
+
+/* Thông báo của hệ thống chỉ hiện khi trang đang chạy ngầm (tab ẩn), vì khi đang xem trang đã có thông báo trong trang */
+function sysNotify(title, body) {
+  if (!SET || !SET.browser || !('Notification' in window) || Notification.permission !== 'granted' || !document.hidden) return;
+  try { const n = new Notification(title, { body, tag: 'eg-' + title }); n.onclick = () => { window.focus(); n.close(); }; } catch (e) {}
+}
+function notifyEvent(kind, q) {
+  if (!SET) return;
+  let title, body, to;
+  if (kind === 'question') {
+    if (!SET.notifyQuestion) return;
+    title = 'Câu hỏi mới từ học viên'; body = `${nameOf(q.user)} hỏi về bài "${q.unitTitle}".`; to = { name: 'questions' };
+  } else if (kind === 'reply') {
+    if (!SET.notifyReply) return;
+    title = 'Giáo viên đã trả lời'; body = `Câu hỏi của bạn về bài "${q.unitTitle}" đã có câu trả lời.`; to = { name: 'qa' };
+  } else {
+    title = 'Đến giờ học rồi'; body = 'Hôm nay bạn chưa học. Hãy học một bài hoặc làm vài câu quiz.'; to = { name: 'dash' };
+  }
+  toast(`${title}: ${body}`, 8000, to);
+  sysNotify(title, body);
+}
+const hhmmNow = () => { const n = new Date(Date.now()); return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0'); };
+/* Nhắc học: đến giờ đã đặt mà hôm nay chưa học thì nhắc một lần trong ngày. Chỉ hoạt động khi trang đang mở. */
+function reminderDue() { return !!(ME && ME.role === 'student' && SET && SET.remind && !S.days.includes(day()) && hhmmNow() >= SET.remindTime); }
+function checkReminder() {
+  if (!reminderDue() || SET.lastRemind === day()) return;
+  SET.lastRemind = day(); saveSettings();
+  notifyEvent('remind');
+  if (view.name === 'dash') render();
+}
+
+function onQA(list, err) {
+  if (err || !list) {
+    if (!qaWarned) { qaWarned = true; toast('Chưa dùng được mục Hỏi đáp. Hãy cập nhật quy tắc Firestore theo hướng dẫn mới.', 8000); }
+    return;
+  }
+  const items = list.map(cleanQ).filter(q => q.id && q.text).sort((a, b) => b.created - a.created);
+  const next = {}; items.forEach(q => { next[q.id] = q; });
+  if (qaBase && ME) {
+    items.forEach(q => {
+      const p = qaPrev[q.id];
+      if (ME.role === 'admin' && !p && !q.reply) notifyEvent('question', q);
+      if (ME.role === 'student' && p && !p.reply && q.reply) notifyEvent('reply', q);
+    });
+  }
+  QA = items; qaPrev = next; qaBase = true;
+  refreshQA();
+}
+function refreshQA() {
+  if (!ME) return;
+  if (!['qa', 'questions', 'students', 'dash'].includes(view.name)) { renderNav(); return; }
+  const ae = document.activeElement;
+  if (ae && ae.tagName === 'TEXTAREA' && $app.contains(ae)) { renderNav(); return; }   /* đang gõ: không làm mất con trỏ */
+  render();
 }
 
 /* ===================== THÀNH PHẦN GIAO DIỆN DÙNG CHUNG ===================== */
@@ -1982,25 +2131,26 @@ function progressChart(p) {
 const $app = $('#app');
 function go(v) { view = v; render(); window.scrollTo(0, 0); }
 function navKey() {
-  return ({ dash: 'dash', lessons: 'lessons', part: 'lessons', unit: 'lessons', quiz: 'lessons', result: 'lessons', review: 'review', students: 'students', student: 'students', account: 'account' })[view.name] || 'dash';
+  return ({ dash: 'dash', lessons: 'lessons', part: 'lessons', unit: 'lessons', ask: 'lessons', quiz: 'lessons', result: 'lessons', review: 'review', qa: 'qa', questions: 'questions', students: 'students', student: 'students', account: 'account' })[view.name] || 'dash';
 }
 function render() {
   const authed = !!ME;
   $('#auth').hidden = authed;
   $('#shell').hidden = !authed;
   if (!authed) { renderAuth(); return; }
-  if (ME.role !== 'admin' && (view.name === 'students' || view.name === 'student')) view = { name: 'dash' };
-  if (ME.role === 'admin' && (view.name === 'dash' || view.name === 'review')) view = { name: 'students' };
+  if (ME.role !== 'admin' && ['students', 'student', 'questions'].includes(view.name)) view = { name: 'dash' };
+  if (ME.role === 'admin' && ['dash', 'review', 'qa', 'ask'].includes(view.name)) view = { name: 'students' };
   renderNav();
-  ({ dash: renderDash, lessons: renderLessons, part: renderPart, unit: renderUnit, quiz: renderQuiz, result: renderResult, review: renderReview, students: renderStudents, student: renderStudentDetail, account: renderAccount }[view.name] || renderDash)();
+  ({ dash: renderDash, lessons: renderLessons, part: renderPart, unit: renderUnit, ask: renderAsk, quiz: renderQuiz, result: renderResult, review: renderReview, qa: renderQA, questions: renderQuestions, students: renderStudents, student: renderStudentDetail, account: renderAccount }[view.name] || renderDash)();
 }
 function renderNav() {
   const admin = ME.role === 'admin', s = stats(S);
   const cur = navKey();
   const items = admin
-    ? [['students', 'Học viên'], ['lessons', 'Bài học'], ['account', 'Tài khoản']]
-    : [['dash', 'Tổng quan'], ['lessons', 'Bài học'], ['review', 'Ôn câu sai'], ['account', 'Tài khoản']];
-  const badge = k => (k === 'review' && s.wrong) ? `<i>${s.wrong}</i>` : '';
+    ? [['students', 'Học viên'], ['questions', 'Câu hỏi'], ['lessons', 'Bài học'], ['account', 'Tài khoản']]
+    : [['dash', 'Tổng quan'], ['lessons', 'Bài học'], ['review', 'Ôn câu sai'], ['qa', 'Hỏi đáp'], ['account', 'Tài khoản']];
+  const count = k => k === 'review' ? s.wrong : k === 'qa' ? unreadReplies() : k === 'questions' ? pendingQ() : 0;
+  const badge = k => count(k) ? `<i>${count(k)}</i>` : '';
   $('#side').innerHTML = `
     <div class="brand">Easy Grammar<small>Ngữ pháp cho kỳ thi THPTQG</small></div>
     <nav>${items.map(it => `<button class="nv" data-act="nav" data-arg="${it[0]}" ${cur === it[0] ? 'aria-current="page"' : ''}>${it[1]}${badge(it[0])}</button>`).join('')}</nav>
@@ -2121,8 +2271,12 @@ function renderDash() {
       <p class="muted">${st ? `Điểm tốt nhất ${st.best}/${n}.` : 'Bạn chưa làm bài kiểm tra này.'}</p>
       <div class="btns"><button class="btn" data-act="starttest" data-arg="${t.id}">Làm bài kiểm tra</button></div>`;
   }
+  const ur = unreadReplies();
+  const banners = (ur ? `<div class="banner info"><span>Giáo viên đã trả lời ${ur} câu hỏi của bạn.</span><button class="btn small" data-act="nav" data-arg="qa">Xem câu trả lời</button></div>` : '')
+    + (reminderDue() ? '<div class="banner"><span>Hôm nay bạn chưa học. Hãy học một bài hoặc làm vài câu quiz để nhận ngôi sao.</span></div>' : '');
   $app.innerHTML = `
     <h1 class="h1">Chào ${esc(ME.name)}</h1>
+    ${banners ? `<div class="banners">${banners}</div>` : ''}
     <div class="dash">
       <section class="pct-card" aria-label="Phần trăm hoàn thành khóa học">
         <p class="pc-l">Hoàn thành khóa học</p>
@@ -2206,6 +2360,7 @@ function renderUnit() {
       </article>`).join('') +
       `<aside class="traps"><h3>Lỗi hay gặp</h3><ul>${u.traps.map(t => `<li>${t}</li>`).join('')}</ul></aside>
        ${u.src ? `<p class="muted sm" style="margin-top:12px">${u.src}</p>` : ''}
+       ${ME.role === 'student' ? `<aside class="ask"><div><b>Còn thắc mắc về bài này?</b><span>Hỏi giáo viên, câu trả lời sẽ hiện trong mục Hỏi đáp.</span></div><button class="btn ghost small" data-act="ask" data-arg="${u.id}">Hỏi giáo viên</button></aside>` : ''}
        <div class="btns"><button class="btn" data-act="tab" data-arg="practice">Sang luyện tập</button></div>`;
   } else {
     const st = S.units[u.id];
@@ -2330,6 +2485,7 @@ function renderResult() {
         ${u ? '<button class="btn" data-act="startquiz">Làm lại quiz</button>' : ''}
         ${wrong ? `<button class="btn ${u ? 'ghost' : ''}" data-act="review">Ôn câu sai (${wrong})</button>` : ''}
         ${u ? '<button class="btn ghost" data-act="tab" data-arg="learn">Xem lại bài học</button>' : ''}
+        ${u && ME.role === 'student' ? `<button class="btn ghost" data-act="ask" data-arg="${u.id}">Hỏi giáo viên về bài này</button>` : ''}
         ${pt ? `<button class="btn ghost" data-act="part" data-arg="${pt.id}">Quay lại Phần ${pt.no}</button>`
           : `<button class="btn ghost" data-act="nav" data-arg="${ME.role === 'admin' ? 'students' : 'dash'}">${ME.role === 'admin' ? 'Về danh sách học viên' : 'Về tổng quan'}</button>`}
       </div>
@@ -2358,6 +2514,121 @@ function renderTestResult() {
     </section></div>`;
 }
 
+/* ===================== HỎI ĐÁP ===================== */
+function fillDrafts() { $app.querySelectorAll('textarea[data-draft]').forEach(t => { t.value = drafts[t.dataset.draft] || ''; }); }
+function renderAsk() {
+  const u = U(view.id), pt = u && partOf(u.id);
+  if (!u || (pt && partLocked(pt))) return go({ name: 'lessons' });
+  const mine = QA.filter(q => q.unit === u.id);
+  const full = pendingQ() >= MAX_PENDING;
+  $app.innerHTML = `
+    <div class="narrow">
+    <button class="back" data-act="unit" data-arg="${u.id}">Quay lại bài học</button>
+    <h1 class="h1">Hỏi giáo viên</h1>
+    <p class="lead">Bài: <b>${esc(u.title)}</b>. Hãy viết rõ chỗ bạn chưa hiểu, ví dụ nêu câu hoặc quy tắc cụ thể. Giáo viên sẽ trả lời trong mục Hỏi đáp.</p>
+    <section class="sec">
+      ${full ? `<div class="err">Bạn đang có ${MAX_PENDING} câu hỏi chưa được trả lời. Hãy chờ giáo viên trả lời rồi hỏi tiếp.</div>` : ''}
+      <label class="fld"><span>Câu hỏi của bạn</span>
+        <textarea class="code" data-draft="ask:${u.id}" id="qText" maxlength="1000" rows="5" placeholder="Ví dụ: Em chưa hiểu vì sao câu ... lại dùng ..."></textarea></label>
+      <p class="muted sm" id="qCount" style="margin:0 0 4px">0/1000 ký tự</p>
+      <div class="btns"><button class="btn" data-act="sendq" data-arg="${u.id}" ${full ? 'disabled' : ''}>Gửi cho giáo viên</button></div>
+    </section>
+    ${mine.length ? `<section class="sec"><h3>Câu hỏi trước đây về bài này</h3>${mine.map(q => qCard(q, false)).join('')}</section>` : ''}
+    </div>`;
+  fillDrafts();
+  $('#qCount').textContent = ($('#qText').value.length) + '/1000 ký tự';
+}
+function qCard(q, fresh) {
+  return `<div class="qa-i${fresh ? ' new' : ''}">
+    <div class="qa-h"><b>${esc(q.unitTitle)}${fresh ? ' <i class="chip">Mới</i>' : ''}</b><span class="muted sm">${fmtTime(q.created)}</span></div>
+    <p class="qa-q">${esc(q.text)}</p>
+    ${q.reply ? `<div class="qa-a"><small>Giáo viên trả lời, ${fmtTime(q.replied)}</small><p>${esc(q.reply)}</p></div>` : '<p class="muted sm" style="margin:0">Đang chờ giáo viên trả lời.</p>'}
+  </div>`;
+}
+async function submitQuestion(unitId) {
+  const u = U(unitId), ta = $('#qText');
+  if (!u || !ta) return;
+  const text = ta.value.trim();
+  if (!text) return toast('Hãy viết câu hỏi trước khi gửi.');
+  if (text.length > 1000) return toast('Câu hỏi quá dài (tối đa 1000 ký tự).');
+  if (pendingQ() >= MAX_PENDING) return toast(`Bạn đang có ${MAX_PENDING} câu hỏi chưa được trả lời. Hãy chờ giáo viên trả lời rồi hỏi tiếp.`, 5000);
+  const btn = $('[data-act="sendq"]'); if (btn) btn.disabled = true;
+  try {
+    await Backend.addQuestion({ uid: ME.uid, user: ME.user, unit: u.id, unitTitle: u.title, text, created: Backend.stamp(), reply: '', replied: null, seenByAdmin: false, seenByStudent: true });
+    delete drafts['ask:' + u.id];
+    toast('Đã gửi câu hỏi cho giáo viên.');
+    go({ name: 'qa' });
+  } catch (e) {
+    if (btn) btn.disabled = false;
+    toast('Chưa gửi được câu hỏi. Hãy kiểm tra mạng, hoặc báo giáo viên cập nhật quy tắc Firestore.', 7000);
+  }
+}
+function renderQA() {
+  /* câu trả lời mới hiện nhãn "Mới", kể cả khi nó đến lúc học viên đang mở sẵn trang này */
+  const fresh = new Set(view.fresh || []);
+  QA.forEach(q => { if (q.reply && !q.seenByStudent) fresh.add(q.id); });
+  view.fresh = [...fresh];
+  $app.innerHTML = `
+    <div class="narrow">
+    <h1 class="h1">Hỏi đáp</h1>
+    <p class="lead">Các câu hỏi bạn đã gửi cho giáo viên và câu trả lời. Để hỏi thêm, mở một bài học và bấm Hỏi giáo viên ở cuối bài.</p>
+    ${QA.length ? QA.map(q => qCard(q, fresh.has(q.id))).join('')
+      : '<div class="empty"><h3>Bạn chưa đặt câu hỏi nào</h3><p class="muted">Mở một bài học, kéo xuống cuối bài và bấm Hỏi giáo viên.</p><div class="btns"><button class="btn" data-act="nav" data-arg="lessons">Đến danh sách bài</button></div></div>'}
+    </div>`;
+  /* mở trang là coi như đã đọc các câu trả lời mới */
+  QA.forEach(q => { if (q.reply && !q.seenByStudent) { q.seenByStudent = true; Promise.resolve(Backend.updateQuestion(q.id, { seenByStudent: true })).catch(() => {}); } });
+  renderNav();
+}
+
+/* Giáo viên: danh sách câu hỏi từ học viên */
+function adminQCard(q, open) {
+  return `<div class="qa-i">
+    <div class="qa-h"><b>${esc(nameOf(q.user))}, ${esc(q.unitTitle)}</b><span class="muted sm">${fmtTime(q.created)}</span></div>
+    <p class="qa-q">${esc(q.text)}</p>
+    ${open ? `
+      <textarea class="code" data-draft="reply:${esc(q.id)}" maxlength="2000" rows="3" placeholder="Viết câu trả lời cho học viên"></textarea>
+      <div class="btns"><button class="btn small" data-act="replyq" data-arg="${esc(q.id)}">Gửi trả lời</button>
+        ${q.unit ? `<button class="btn ghost small" data-act="unit" data-arg="${q.unit}">Xem bài</button>` : ''}</div>`
+    : `<div class="qa-a"><small>Bạn đã trả lời, ${fmtTime(q.replied)}</small><p>${esc(q.reply)}</p></div>`}
+  </div>`;
+}
+function renderQuestions() {
+  const tab = view.tab === 'done' ? 'done' : 'open';
+  const open = QA.filter(q => !q.reply), done = QA.filter(q => q.reply);
+  const list = tab === 'open' ? open : done;
+  $app.innerHTML = `
+    <div class="narrow">
+    <h1 class="h1">Câu hỏi từ học viên</h1>
+    <p class="lead">Học viên đặt câu hỏi ở cuối mỗi bài học. Trả lời tại đây, học viên sẽ được báo khi mở app.</p>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="${tab === 'open'}" data-act="qtab" data-arg="open">Chưa trả lời (${open.length})</button>
+      <button class="tab" role="tab" aria-selected="${tab === 'done'}" data-act="qtab" data-arg="done">Đã trả lời (${done.length})</button>
+    </div>
+    ${list.length ? list.map(q => adminQCard(q, tab === 'open')).join('')
+      : `<div class="empty"><h3>${tab === 'open' ? 'Không có câu hỏi nào đang chờ' : 'Chưa có câu hỏi nào được trả lời'}</h3></div>`}
+    </div>`;
+  fillDrafts();
+}
+async function sendReply(id) {
+  const ta = [...$app.querySelectorAll('textarea[data-draft]')].find(t => t.dataset.draft === 'reply:' + id);
+  const text = ta ? ta.value.trim() : '';
+  if (!text) return toast('Hãy viết câu trả lời trước khi gửi.');
+  if (text.length > 2000) return toast('Câu trả lời quá dài (tối đa 2000 ký tự).');
+  try {
+    await Backend.updateQuestion(id, { reply: text, replied: Backend.stamp(), seenByAdmin: true, seenByStudent: false });
+    delete drafts['reply:' + id];
+    toast('Đã gửi trả lời cho học viên.');
+  } catch (e) { toast('Chưa gửi được trả lời. Hãy kiểm tra mạng và quy tắc Firestore.', 6000); }
+}
+function pendingCardHTML() {
+  const p = QA.filter(q => !q.reply);
+  return `<section class="sec hl"><h3>Câu hỏi từ học viên</h3>
+    ${p.length ? `<p>Có <b>${p.length}</b> câu hỏi chưa trả lời.</p>
+      ${p.slice(0, 3).map(q => `<div class="wq">${esc(q.text.length > 110 ? q.text.slice(0, 110) + '...' : q.text)}<small>${esc(nameOf(q.user))}, ${esc(q.unitTitle)}</small></div>`).join('')}`
+    : '<p class="muted">Không có câu hỏi nào đang chờ trả lời.</p>'}
+    <div class="btns"><button class="btn${p.length ? '' : ' ghost'}" data-act="nav" data-arg="questions">${p.length ? 'Trả lời ngay' : 'Xem tất cả câu hỏi'}</button></div></section>`;
+}
+
 /* ===================== GIÁO VIÊN: HỌC VIÊN ===================== */
 function renderStudents() {
   const R = rosterArr();
@@ -2365,6 +2636,7 @@ function renderStudents() {
     <div class="narrow">
     <h1 class="h1">Học viên</h1>
     <p class="lead">Chọn một học viên để xem tiến trình học và các câu đang sai.</p>
+    ${pendingCardHTML()}
     ${R.map(r => {
       const s = stats(r.p);
       return `<button class="srow" data-act="viewstudent" data-arg="${esc(r.u)}">
@@ -2391,6 +2663,11 @@ function renderStudentDetail() {
 }
 
 /* ===================== TÀI KHOẢN ===================== */
+function permText() {
+  if (!('Notification' in window)) return 'Trình duyệt này không hỗ trợ thông báo hệ thống. Bạn vẫn nhận thông báo ngay trong trang.';
+  if (Notification.permission === 'denied') return 'Trình duyệt đang chặn thông báo của trang này. Hãy bật lại trong cài đặt trang web của trình duyệt.';
+  return 'Hiện thông báo của hệ thống khi app đang chạy ngầm trong trình duyệt. Trên điện thoại có thể không hiện, nhưng thông báo trong trang vẫn hoạt động.';
+}
 function renderAccount() {
   $app.innerHTML = `
     <div class="narrow">
@@ -2402,6 +2679,20 @@ function renderAccount() {
         <div><dt>Tên đăng nhập</dt><dd>${esc(ME.user)}</dd></div>
         <div><dt>Loại tài khoản</dt><dd>${ME.role === 'admin' ? 'Giáo viên' : 'Học viên'}</dd></div>
       </dl></section>
+    <section class="sec"><h3>Thông báo</h3>
+      ${ME.role === 'student' ? `
+      <label class="swrow"><span><b>Nhắc học bài mỗi ngày</b><small>Đến giờ đã đặt mà hôm nay bạn chưa học thì app nhắc một lần. Nhắc học chỉ hiện khi trang Easy Grammar đang mở trong trình duyệt.</small></span>
+        <input type="checkbox" role="switch" class="sw" data-set="remind" ${SET.remind ? 'checked' : ''}></label>
+      <div class="swrow"><span><b>Giờ nhắc</b></span><input type="time" class="timeinp" data-settime="remindTime" value="${esc(SET.remindTime)}"></div>
+      <label class="swrow"><span><b>Báo khi giáo viên trả lời</b><small>Hiện thông báo ngay khi giáo viên trả lời câu hỏi của bạn.</small></span>
+        <input type="checkbox" role="switch" class="sw" data-set="notifyReply" ${SET.notifyReply ? 'checked' : ''}></label>`
+      : `
+      <label class="swrow"><span><b>Báo khi có câu hỏi mới</b><small>Hiện thông báo ngay khi có học viên đặt câu hỏi, lúc bạn đang mở app.</small></span>
+        <input type="checkbox" role="switch" class="sw" data-set="notifyQuestion" ${SET.notifyQuestion ? 'checked' : ''}></label>`}
+      <label class="swrow"><span><b>Thông báo của trình duyệt</b><small>${esc(permText())}</small></span>
+        <input type="checkbox" role="switch" class="sw" data-set="browser" ${SET.browser && 'Notification' in window && Notification.permission === 'granted' ? 'checked' : ''}></label>
+      <p class="muted sm" style="margin:10px 0 0">Cài đặt này lưu trên thiết bị đang dùng. Thông báo chỉ hoạt động khi app đang mở trong trình duyệt.</p>
+    </section>
     <section class="sec"><h3>Phiên đăng nhập</h3>
       <div class="btns" style="margin-top:0"><button class="btn ghost" data-act="logout">Đăng xuất</button></div></section>
     </div>`;
@@ -2409,6 +2700,7 @@ function renderAccount() {
 
 /* ===================== SỰ KIỆN ===================== */
 document.addEventListener('click', e => {
+  if (e.target.closest('#toast') && toastTo) { const to = toastTo; $('#toast').hidden = true; toastTo = null; go(to); return; }
   const el = e.target.closest('[data-act]');
   if (!el || el.disabled) return;
   const a = el.dataset.act, arg = el.dataset.arg;
@@ -2418,6 +2710,10 @@ document.addEventListener('click', e => {
     case 'seeddemo': Backend.seedDemo(); toast('Đã nạp dữ liệu mẫu cho 2 học viên'); break;
     case 'nav': go({ name: arg }); break;
     case 'part': go({ name: 'part', id: arg }); break;
+    case 'ask': go({ name: 'ask', id: arg }); break;
+    case 'sendq': submitQuestion(arg); break;
+    case 'replyq': sendReply(arg); break;
+    case 'qtab': go({ name: 'questions', tab: arg }); break;
     case 'unit': markStudied(); go({ name: 'unit', id: arg, tab: 'learn' }); break;
     case 'calprev': calMonth = shiftMonth(calMonth, -1); render(); break;
     case 'calnext': calMonth = shiftMonth(calMonth, 1); render(); break;
@@ -2436,6 +2732,35 @@ document.addEventListener('click', e => {
       }
       break;
     case 'viewstudent': calMonth = day().slice(0, 7); go({ name: 'student', key: arg }); break;
+  }
+});
+/* lưu nội dung đang gõ dở */
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.draft) {
+    drafts[t.dataset.draft] = t.value;
+    if (t.id === 'qText') $('#qCount').textContent = t.value.length + '/1000 ký tự';
+  }
+});
+/* công tắc cài đặt thông báo */
+document.addEventListener('change', async e => {
+  const t = e.target;
+  if (!SET || !t.dataset) return;
+  if (t.dataset.set) {
+    const key = t.dataset.set;
+    if (key === 'browser') {
+      if (t.checked) {
+        if (!('Notification' in window)) { t.checked = false; return toast('Trình duyệt này không hỗ trợ thông báo hệ thống.'); }
+        let p = Notification.permission;
+        if (p === 'default') { try { p = await Notification.requestPermission(); } catch (_) {} }
+        if (p !== 'granted') { t.checked = false; SET.browser = false; saveSettings(); return toast('Chưa được cấp quyền thông báo. Hãy cho phép trong cài đặt trình duyệt.', 5000); }
+      }
+      SET.browser = t.checked;
+    } else SET[key] = t.checked;
+    saveSettings();
+    if (key === 'remind') { SET.lastRemind = ''; saveSettings(); }
+  } else if (t.dataset.settime && /^\d{2}:\d{2}$/.test(t.value)) {
+    SET[t.dataset.settime] = t.value; SET.lastRemind = ''; saveSettings();
   }
 });
 document.addEventListener('submit', e => {
