@@ -128,9 +128,6 @@ textarea.code{width:100%;min-height:84px;border:1px solid var(--line);border-rad
 
 
 /* Dashboard học viên */
-.hero2,.row2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
-.row2{margin-bottom:0}
-@media (max-width:860px){.hero2,.row2{grid-template-columns:1fr}}
 .pct-card{background:var(--ink);color:#fff;border-radius:14px;padding:22px 24px}
 .pc-l{margin:0;font-weight:600;color:rgba(255,255,255,.85)}
 .pc-n{margin:0 0 10px;font-size:4rem;line-height:1.15;font-weight:800;letter-spacing:-.02em}
@@ -149,10 +146,31 @@ textarea.code{width:100%;min-height:84px;border:1px solid var(--line);border-rad
 .k-done{background:var(--ok)}.k-prog{background:var(--accent)}.k-none{background:var(--line)}
 .ph{margin:20px 0 10px;font-size:1rem;font-weight:700}
 
-.exam-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
-.exam-card h3{margin:0;font-size:1.0625rem;font-weight:700}
-.ex-n{margin:6px 0 8px;font-size:3.2rem;line-height:1.3;font-weight:800}
-.ex-n small{font-size:1rem;font-weight:600;color:var(--ink-2)}
+
+/* Tổng quan học viên: lưới 2 cột, lịch học nằm bên phải */
+.dash{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-template-areas:"pct cal" "next cal" "rev cal";gap:16px;align-items:start}
+.dash>.pct-card{grid-area:pct}
+.dash>.cal-card{grid-area:cal}
+.dash>.sec.hl{grid-area:next}
+.dash>.sec.rev{grid-area:rev}
+.dash>.sec{margin:0}
+@media (max-width:860px){.dash{grid-template-columns:1fr;grid-template-areas:"pct" "cal" "next" "rev"}}
+.cal-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.cal-h h3{margin:0;font-size:1.0625rem;font-weight:700}
+.cal-nav{display:flex;align-items:center;gap:6px}
+.cal-nav span{min-width:86px;text-align:center;font-weight:600;font-size:.9375rem}
+.cal-nav button{width:32px;height:32px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:1.25rem;line-height:1;padding:0}
+.cal-nav button:hover{background:#e9eef7}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-w{text-align:center;font-size:.75rem;font-weight:600;color:var(--ink-2);padding-bottom:2px}
+.cd{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:.8125rem;line-height:1.1}
+.cd b{font-weight:500}
+.cd em{font-style:normal;color:#b7791f;font-size:.95rem;line-height:1}
+.cd.on{background:#fff4c2}
+.cd.on b{font-weight:800}
+.cd.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.cal-s{margin:12px 0 0}
 
 /* Lessons list */
 .row{display:grid;grid-template-columns:44px 1fr;gap:4px 12px;align-items:start;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
@@ -232,14 +250,14 @@ textarea.code{width:100%;min-height:84px;border:1px solid var(--line);border-rad
         hocvien1@easygrammar.app   hocvien2@easygrammar.app   admin@easygrammar.app
       (học viên chỉ cần gõ hocvien1, hocvien2 hoặc admin ở màn hình đăng nhập).
    3) Firestore Database > Rules: dán nội dung file firestore.rules đi kèm.
-   Khi FIREBASE_CONFIG còn để trống, app chạy chế độ xem thử (dữ liệu chỉ lưu trong trình duyệt). */
+   Cấu hình dưới đây đã điền sẵn cho dự án easy-12d3d. Nếu để trống, app chạy chế độ xem thử (dữ liệu chỉ lưu trong trình duyệt). */
 const FIREBASE_CONFIG = {
-     apiKey: 'AIzaSyAA_irE0JLyeuH5ePR4VDkQRNpyWbm4hsI',
-     authDomain: 'easy-12d3d.firebaseapp.com',
-     projectId: 'easy-12d3d',
-     storageBucket: 'easy-12d3d.firebasestorage.app',
-     messagingSenderId: '298229286190',
-     appId: '1:298229286190:web:86bac807b47ce2f34426bf'
+  apiKey: 'AIzaSyAA_irE0JLyeuH5ePR4VDkQRNpyWbm4hsI',
+  authDomain: 'easy-12d3d.firebaseapp.com',
+  projectId: 'easy-12d3d',
+  storageBucket: 'easy-12d3d.firebasestorage.app',
+  messagingSenderId: '298229286190',
+  appId: '1:298229286190:web:86bac807b47ce2f34426bf'
 };
 const EMAIL_DOMAIN = 'easygrammar.app';   /* tên đăng nhập + @ + EMAIL_DOMAIN = email trong Firebase */
 const ADMIN_USER = 'admin';               /* tên đăng nhập của tài khoản giáo viên */
@@ -248,8 +266,6 @@ const ACCOUNTS = {                        /* tên hiển thị; học viên mà 
   hocvien2: { name: 'Học viên 2' },
   admin: { name: 'Giáo viên' }
 };
-/* Ngày thi dùng cho thẻ đếm ngược (dự kiến 11-12/6/2027, giống lịch năm 2026). Đổi khi có lịch chính thức. */
-const EXAM = { name: 'Kỳ thi THPTQG 2027', date: '2027-06-11' };
 const LET = ['A', 'B', 'C', 'D'];
 
 /* ===================== DỮ LIỆU BÀI HỌC ===================== */
@@ -1601,6 +1617,8 @@ const stripTags = s => String(s).replace(/<[^>]*>/g, '');
 const day = (o = 0) => new Date(Date.now() + o * 864e5).toLocaleDateString('en-CA');
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const validDay = d => typeof d === 'string' && DATE_RE.test(d) && !isNaN(Date.parse(d));
 let toastTimer;
 function toast(m) {
   const t = $('#toast');
@@ -1626,7 +1644,7 @@ function getQ(id) {
 }
 
 /* ===================== TIẾN ĐỘ ===================== */
-const emptyP = () => ({ units: {}, tests: {}, wrong: [] });
+const emptyP = () => ({ units: {}, tests: {}, wrong: [], days: [] });
 /* Làm sạch dữ liệu đọc từ máy chủ (không tin hoàn toàn dữ liệu bên ngoài) */
 function cleanP(o) {
   const p = emptyP();
@@ -1634,6 +1652,9 @@ function cleanP(o) {
   UNITS.forEach(u => { const s = o.units && o.units[u.id]; if (s && Number.isFinite(+s.best)) p.units[u.id] = { best: clamp(Math.floor(+s.best), 0, u.quiz.length) }; });
   TESTS.forEach(t => { const s = o.tests && o.tests[t.id]; if (s && Number.isFinite(+s.best)) p.tests[t.id] = { best: clamp(Math.floor(+s.best), 0, t.quiz.length) }; });
   if (Array.isArray(o.wrong)) p.wrong = [...new Set(o.wrong.filter(id => typeof id === 'string' && getQ(id)))];
+  /* Ngày đã học được lưu trong cùng trường units (khóa _days) để không cần đổi quy tắc Firestore */
+  const rawDays = o.units && o.units._days;
+  if (Array.isArray(rawDays)) p.days = [...new Set(rawDays.filter(validDay))].sort().slice(-400);
   return p;
 }
 const isDone = (p, u) => !!p.units[u.id] && p.units[u.id].best >= passMark(u);
@@ -1684,7 +1705,7 @@ const PreviewBackend = {
   subscribeStudents(cb) { this.rcb = cb; cb(Object.values(this.read().docs)); return () => { this.rcb = null; }; },
   seedDemo() {
     const s = this.read();
-    s.docs.hocvien1 = { user: 'hocvien1', units: { u4: { best: 8 }, u5: { best: 7 }, u6: { best: 6 }, u7: { best: 4 }, u9: { best: 5 }, u10: { best: 3 } }, tests: { t1: { best: 18 } }, wrong: ['u7:1', 'u7:5', 'u10:2', 't1:4', 't1:9'], updated: Date.now() };
+    s.docs.hocvien1 = { user: 'hocvien1', units: { u4: { best: 8 }, u5: { best: 7 }, u6: { best: 6 }, u7: { best: 4 }, u9: { best: 5 }, u10: { best: 3 }, _days: [day(-1), day(-2), day(-4)] }, tests: { t1: { best: 18 } }, wrong: ['u7:1', 'u7:5', 'u10:2', 't1:4', 't1:9'], updated: Date.now() };
     s.docs.hocvien2 = { user: 'hocvien2', units: { u4: { best: 6 } }, tests: { t1: { best: 14 } }, wrong: ['t1:0', 't1:5', 't1:11', 'u4:7'], updated: Date.now() };
     this.write(s);
     if (this.rcb) this.rcb(Object.values(s.docs));
@@ -1699,10 +1720,19 @@ let view = { name: 'auth' };
 let saveTimer = null;
 
 function persist() { if (!ME || ME.role !== 'student') return; clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 500); }
+/* Ghi nhận hôm nay là ngày có học: khi mở một bài học hoặc trả lời một câu hỏi */
+function markStudied() {
+  if (!ME || ME.role !== 'student') return;
+  const d = day();
+  if (S.days.includes(d)) return;
+  S.days.push(d);
+  if (S.days.length > 400) S.days = S.days.slice(-400);
+  persist();
+}
 async function doSave() {
   clearTimeout(saveTimer); saveTimer = null;
   if (!ME || ME.role !== 'student') return;
-  try { await Backend.save(ME.uid, { user: ME.user, units: S.units, tests: S.tests, wrong: S.wrong, updated: Backend.stamp() }); }
+  try { await Backend.save(ME.uid, { user: ME.user, units: Object.assign({}, S.units, { _days: S.days }), tests: S.tests, wrong: S.wrong, updated: Backend.stamp() }); }
   catch (e) { toast('Chưa lưu được tiến độ lên máy chủ. Hãy kiểm tra mạng.'); }
 }
 async function doLogout() { if (saveTimer) await doSave(); try { await Backend.logout(); } catch (e) {} }
@@ -1880,8 +1910,6 @@ async function doLogin(f) {
 }
 
 /* ===================== TỔNG QUAN HỌC VIÊN ===================== */
-const daysToExam = () => Math.round((new Date(EXAM.date + 'T00:00:00') - new Date(day() + 'T00:00:00')) / 864e5);
-const fmtDate = d => d.split('-').reverse().join('/');
 /* Mục tiếp theo cần làm: bài học hoặc bài kiểm tra đầu tiên chưa hoàn thành trong các phần đã mở */
 function nextItem() {
   for (const pt of PARTS) {
@@ -1890,17 +1918,44 @@ function nextItem() {
   }
   return null;
 }
+/* Lịch học: ngày nào học (mở bài hoặc trả lời câu hỏi) thì hiện một ngôi sao */
+let calMonth = day().slice(0, 7);
+function shiftMonth(ym, k) {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(y, m - 1 + k, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+function calendarHTML(days) {
+  const [y, m] = calMonth.split('-').map(Number);
+  const lead = (new Date(y, m - 1, 1).getDay() + 6) % 7;      /* T2 là cột đầu tiên */
+  const dim = new Date(y, m, 0).getDate();
+  const set = new Set(days), today = day();
+  let cells = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map(w => `<span class="cal-w">${w}</span>`).join('');
+  for (let i = 0; i < lead; i++) cells += '<i class="cd empty"></i>';
+  let count = 0;
+  for (let d = 1; d <= dim; d++) {
+    const key = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const on = set.has(key);
+    if (on) count++;
+    cells += `<span class="cd${on ? ' on' : ''}${key === today ? ' today' : ''}"${on ? ` aria-label="Ngày ${d}: đã học"` : ''}><b>${d}</b>${on ? '<em>★</em>' : ''}</span>`;
+  }
+  const isNow = calMonth === today.slice(0, 7);
+  const note = set.has(today) ? 'Hôm nay bạn đã học. Ngôi sao đã được thêm vào lịch.' : 'Học một bài hoặc làm một câu quiz hôm nay để nhận ngôi sao.';
+  return `
+    <div class="cal-h"><h3>Lịch học</h3>
+      <div class="cal-nav">
+        <button data-act="calprev" aria-label="Tháng trước">&lsaquo;</button>
+        <span>Tháng ${m}/${y}</span>
+        <button data-act="calnext" aria-label="Tháng sau">&rsaquo;</button>
+      </div></div>
+    <div class="cal-g">${cells}</div>
+    <p class="muted sm cal-s">${isNow ? 'Tháng này' : 'Tháng ' + m} bạn đã học <b>${count}</b> ngày.${isNow ? ' ' + note : ''}</p>`;
+}
+
 function renderDash() {
   const s = stats(S);
   const pct = s.total ? Math.round(s.done / s.total * 100) : 0;
   const nx = nextItem();
-  const left = daysToExam();
-  const examHTML = left > 0
-    ? `<p class="ex-n"><span class="mk">${left}</span> <small>ngày</small></p>
-       <p class="muted" style="margin:0">${left >= 7 ? `Còn khoảng ${Math.floor(left / 7)} tuần nữa. ` : ''}Ngày thi dự kiến: ${fmtDate(EXAM.date)}.</p>`
-    : left === 0
-    ? `<p class="ex-n">Hôm nay</p><p class="muted" style="margin:0">Hôm nay là ngày thi. Chúc bạn làm bài thật tốt.</p>`
-    : `<p class="ex-n">Đã qua</p><p class="muted" style="margin:0">Ngày thi ${fmtDate(EXAM.date)} đã qua.</p>`;
   let nextHTML;
   if (!nx) {
     nextHTML = `<h3>Bạn đã hoàn thành toàn bộ khóa học</h3>
@@ -1923,21 +1978,16 @@ function renderDash() {
   }
   $app.innerHTML = `
     <h1 class="h1">Chào ${esc(ME.name)}</h1>
-    <div class="hero2">
+    <div class="dash">
       <section class="pct-card" aria-label="Phần trăm hoàn thành khóa học">
         <p class="pc-l">Hoàn thành khóa học</p>
         <p class="pc-n">${pct}<span>%</span></p>
         <div class="pc-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
         <p class="pc-s">${s.done}/${s.total} bài học và bài kiểm tra đã hoàn thành</p>
       </section>
-      <section class="exam-card" aria-label="Đếm ngược ngày thi">
-        <h3>Đếm ngược ${EXAM.name}</h3>
-        ${examHTML}
-      </section>
-    </div>
-    <div class="row2">
+      <section class="cal-card" aria-label="Lịch học">${calendarHTML(S.days)}</section>
       <section class="sec hl">${nextHTML}</section>
-      <section class="sec">
+      <section class="sec rev">
         <h3>Ôn câu sai</h3>
         <p class="muted">${s.wrong ? `Bạn có ${s.wrong} câu cần ôn lại. Trả lời đúng thì câu đó được gỡ khỏi danh sách.` : 'Chưa có câu sai nào cần ôn.'}</p>
         <button class="btn block" data-act="review" ${s.wrong ? '' : 'disabled'}>Ôn ngay</button>
@@ -2096,6 +2146,7 @@ function pick(k) {
   if (v.picked !== null) return;
   v.picked = k;
   const it = v.items[v.i];
+  markStudied();
   if (k === it.q.a) { v.score++; S.wrong = S.wrong.filter(x => x !== it.id); }
   else if (!S.wrong.includes(it.id)) S.wrong.push(it.id);
   persist(); renderQuiz();
@@ -2221,7 +2272,9 @@ document.addEventListener('click', e => {
     case 'seeddemo': Backend.seedDemo(); toast('Đã nạp dữ liệu mẫu cho 2 học viên'); break;
     case 'nav': go({ name: arg }); break;
     case 'part': go({ name: 'part', id: arg }); break;
-    case 'unit': go({ name: 'unit', id: arg, tab: 'learn' }); break;
+    case 'unit': markStudied(); go({ name: 'unit', id: arg, tab: 'learn' }); break;
+    case 'calprev': calMonth = shiftMonth(calMonth, -1); renderDash(); break;
+    case 'calnext': calMonth = shiftMonth(calMonth, 1); renderDash(); break;
     case 'tab': go({ name: 'unit', id: view.name === 'result' ? view.refId : view.id, tab: arg }); break;
     case 'startquiz': startQuiz('unit', view.name === 'result' ? view.refId : view.id); break;
     case 'starttest': startQuiz('test', arg); break;
