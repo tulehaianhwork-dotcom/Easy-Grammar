@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Easy Grammar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --ink:#1d2742; --ink-2:#4a5573; --paper:#f2f5fa; --card:#ffffff; --line:#d9e0ec;
+  --mark:#ffd84d; --accent:#2c4bd6; --accent-dark:#2339ab; --accent-bg:#e6ecfb;
+  --ok:#17835a; --ok-bg:#e3f4ec; --bad:#c23b2b; --bad-bg:#fbe9e6;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.6;padding-top:env(safe-area-inset-top,0px)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,label:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none !important}
+.muted{color:var(--ink-2)}
+.sm{font-size:.8125rem}
+.h1{font-size:1.75rem;line-height:1.25;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+.lead{margin:0 0 20px;color:var(--ink-2);max-width:60ch}
+.narrow{max-width:680px}
+
+/* Buttons */
+.btn{display:inline-block;border:0;border-radius:10px;padding:12px 20px;font-weight:600;background:var(--accent);color:#fff;text-align:center}
+.btn:hover{background:var(--accent-dark)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:#e9eef7}
+.btn.danger{background:var(--card);color:var(--bad);border:1px solid #efc9c3}
+.btn.danger:hover{background:var(--bad-bg)}
+.btn.small{padding:7px 14px;font-size:.875rem}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.block{display:block;width:100%}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+
+/* Auth */
+.auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.auth-box{width:100%;max-width:420px}
+.auth-box h1{font-size:1.75rem;line-height:1.25;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+.auth-box>p{margin:0 0 20px;color:var(--ink-2)}
+.auth-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.auth-note{margin:14px 0 0;font-size:.8125rem;color:var(--ink-2)}
+.fld{display:block;margin-bottom:14px}
+.fld>span{display:block;font-size:.875rem;font-weight:600;margin-bottom:4px}
+.fld input[type=text],.fld input[type=password]{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font:inherit;background:#fff;color:var(--ink)}
+.fld small{display:block;margin-top:3px;color:var(--ink-2);font-size:.8125rem}
+.pick{display:flex;gap:10px;margin-bottom:14px}
+.pick label{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;font-weight:600;font-size:.9375rem}
+.pick label:has(input:checked){border-color:var(--accent);background:var(--accent-bg)}
+.pick input{margin-right:8px}
+.err{background:var(--bad-bg);border:1px solid #efc9c3;color:var(--bad);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.9375rem}
+
+/* Tabs (auth + unit) */
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:600;color:var(--ink-2);margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+.side{background:var(--card);border-right:1px solid var(--line);padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px}
+.brand{font-weight:800;font-size:1.1rem;line-height:1.25;padding:0 10px}
+.brand small{display:block;font-weight:500;font-size:.8125rem;color:var(--ink-2)}
+.side nav{display:flex;flex-direction:column;gap:4px}
+.nv{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:10px;font-weight:600;color:var(--ink-2)}
+.nv:hover{background:#eef2f9}
+.nv[aria-current="page"]{background:var(--accent-bg);color:var(--accent-dark)}
+.nv i{font-style:normal;background:var(--bad);color:#fff;border-radius:999px;font-size:.75rem;padding:0 8px;line-height:1.5}
+.me{margin-top:auto;border-top:1px solid var(--line);padding:14px 10px 0;display:flex;flex-direction:column;gap:4px;font-size:.875rem}
+.me span{color:var(--ink-2)}
+.me .btn{margin-top:8px}
+.main{padding:26px 30px 56px;width:100%;max-width:1100px}
+.mtop{display:none}
+.bnav{display:none}
+@media (max-width:860px){
+  .shell{display:block}
+  .side{display:none}
+  .main{padding:14px 16px calc(92px + env(safe-area-inset-bottom,0px))}
+  .mtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-weight:800}
+  .mtop span{font-weight:500;font-size:.875rem;color:var(--ink-2)}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
+  .bnav button{flex:1;background:none;border:0;border-top:3px solid transparent;padding:10px 4px;font-size:.8125rem;font-weight:600;color:var(--ink-2)}
+  .bnav button[aria-current="page"]{color:var(--accent-dark);border-top-color:var(--accent)}
+  .bnav i{font-style:normal;color:var(--bad)}
+}
+
+/* Dashboard */
+.dgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.dgrid{grid-template-columns:1fr}}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.sec h3{margin:0 0 10px;font-size:1.0625rem;font-weight:700}
+.sec p{margin:0 0 10px}
+.sec.hl{border-left:5px solid var(--accent);border-radius:4px 12px 12px 4px}
+.nx{font-size:1.35rem;font-weight:800;line-height:1.5}
+.mk{background:linear-gradient(transparent 50%,var(--mark) 50% 90%,transparent 90%);padding:0 .15em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.kv{margin:0}
+.kv div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.kv div:last-child{border-bottom:0}
+.kv dt{color:var(--ink-2)}
+.kv dd{margin:0;font-weight:700;text-align:right}
+.ub{margin-bottom:14px}
+.ub-h{display:flex;justify-content:space-between;gap:10px;font-size:.9375rem;margin-bottom:5px}
+.meter{position:relative;height:8px;background:var(--line);border-radius:4px}
+.meter i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+.meter i.good{background:var(--ok)}
+.meter s{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
+.chip{font-style:normal;font-weight:600;background:var(--mark);color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.75rem}
+.chip.done{background:var(--ok-bg);color:var(--ok)}
+.empty{border:1.5px dashed var(--line);border-radius:12px;padding:20px;background:transparent}
+.empty h3{margin:0 0 8px;font-size:1.0625rem}
+.empty ol{margin:0 0 6px;padding-left:20px}
+.empty li{margin-bottom:6px}
+.wq{padding:10px 0;border-bottom:1px solid var(--line)}
+.wq:last-child{border-bottom:0}
+.wq small{display:block;color:var(--ink-2)}
+.srow{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.srow:hover{border-color:#aab6d3}
+.srow-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.srow small{display:block;color:var(--ink-2);margin-top:2px}
+.demo{margin-left:6px}
+textarea.code{width:100%;min-height:84px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-size:.8125rem;resize:vertical;word-break:break-all;background:#fff;color:var(--ink)}
+
+
+/* Dashboard học viên */
+.hero2,.row2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;margin-bottom:16px}
+.row2{margin-bottom:0}
+@media (max-width:860px){.hero2,.row2{grid-template-columns:1fr}}
+.pct-card{background:var(--ink);color:#fff;border-radius:14px;padding:22px 24px}
+.pc-l{margin:0;font-weight:600;color:rgba(255,255,255,.85)}
+.pc-n{margin:0 0 10px;font-size:4rem;line-height:1.15;font-weight:800;letter-spacing:-.02em}
+.pc-n span{font-size:2rem;margin-left:2px}
+.pc-bar{height:14px;background:rgba(255,255,255,.2);border-radius:7px;overflow:hidden}
+.pc-bar i{display:block;height:100%;background:var(--mark);border-radius:7px}
+.pc-s{margin:10px 0 0;color:rgba(255,255,255,.85)}
+
+.pg{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.donut{width:140px;height:140px;flex:none}
+.donut .dn{font-size:22px;font-weight:800;fill:var(--ink);font-family:inherit}
+.donut .dl{font-size:10px;fill:var(--ink-2);font-family:inherit}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.legend li{display:flex;align-items:center;gap:10px}
+.legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.k-done{background:var(--ok)}.k-prog{background:var(--accent)}.k-none{background:var(--line)}
+.ph{margin:20px 0 10px;font-size:1rem;font-weight:700}
+
+.exam-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.exam-card h3{margin:0;font-size:1.0625rem;font-weight:700}
+.ex-n{margin:6px 0 8px;font-size:3.2rem;line-height:1.3;font-weight:800}
+.ex-n small{font-size:1rem;font-weight:600;color:var(--ink-2)}
+
+/* Lessons list */
+.row{display:grid;grid-template-columns:44px 1fr;gap:4px 12px;align-items:start;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.row:hover{border-color:#aab6d3}
+.row .num{grid-row:1 / span 2;font-size:1.9rem;font-weight:800;line-height:1.1}
+.row b{font-size:1.05rem;font-weight:700}
+.row small{display:block;color:var(--ink-2);font-size:.875rem;line-height:1.45;margin-top:2px}
+.row .meta{grid-column:2;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.8125rem;color:var(--ink-2);margin-top:4px}
+.row.soon{background:transparent;border-style:dashed;cursor:default;opacity:.65}
+.row.soon:hover{border-color:var(--line)}
+.row.test{border-left:5px solid var(--accent);border-radius:4px 12px 12px 4px}
+.row.test .num{font-size:1.15rem;padding-top:6px}
+
+/* Unit */
+.back{background:none;border:0;padding:4px 0;color:var(--ink-2);font-size:.9375rem;font-weight:500;margin-bottom:6px}
+.back:hover{color:var(--ink)}
+.u-title{font-size:1.5rem;font-weight:800;line-height:1.25;margin:0 0 14px}
+.sec h3.t2{font-size:1.125rem}
+.formula{margin:0 0 14px !important;line-height:2}
+.formula span{font-size:1.25rem;font-weight:700;padding:0 .2em;background:linear-gradient(transparent 50%,var(--mark) 50% 90%,transparent 90%);-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.sec ul,.traps ul{margin:0 0 12px;padding-left:20px}
+.sec li,.traps li{margin-bottom:6px}
+.ex{border-left:3px solid var(--line);padding-left:12px}
+.ex p{margin:0 0 8px !important}
+.ex .en{font-weight:600}
+.ex .vi{color:var(--ink-2);font-size:.9375rem}
+.traps{background:var(--bad-bg);border:1px solid #efc9c3;border-radius:12px;padding:18px}
+.traps h3{margin:0 0 10px;font-size:1.125rem;color:var(--bad)}
+
+/* Quiz */
+.count{color:var(--ink-2);font-size:.9375rem;margin:0 0 10px}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:0 0 6px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.qt{font-size:1.1875rem;font-weight:600;line-height:1.5;margin:14px 0}
+.sentence{font-size:1.125rem;line-height:2;margin:-4px 0 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.seg{border-bottom:2px solid var(--ink);padding-bottom:1px}
+.seg::before{content:attr(data-l);font-size:.6875rem;font-weight:700;vertical-align:super;margin-right:3px;color:var(--accent)}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:baseline;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:12px 16px}
+.opt:hover:not([disabled]){border-color:var(--accent)}
+.opt .l{font-weight:800;color:var(--ink-2);min-width:1.1em}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok)}
+.opt.ok .l{color:var(--ok)}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad)}
+.opt.bad .l{color:var(--bad)}
+.opt[disabled]{cursor:default}
+.why{margin-top:14px;border-radius:12px;padding:14px 16px}
+.why.ok{background:var(--ok-bg);border:1px solid #b6dcc9}
+.why.bad{background:var(--bad-bg);border:1px solid #efc9c3}
+.why b{display:block;margin-bottom:4px}
+.why.ok b{color:var(--ok)}
+.why.bad b{color:var(--bad)}
+.why p{margin:0}
+.score{font-size:3.2rem;font-weight:800;line-height:1.1;margin:8px 0 4px}
+
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:.9375rem;z-index:30;max-width:90vw;text-align:center}
+@media (min-width:861px){.toast{bottom:28px}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div id="auth" class="auth" hidden></div>
+<div id="shell" class="shell" hidden>
+  <aside class="side" id="side"></aside>
+  <main class="main">
+    <div class="mtop" id="mtop"></div>
+    <div id="app"></div>
+  </main>
+  <nav class="bnav" id="bnav" aria-label="Điều hướng"></nav>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* ===================== CẤU HÌNH (chỉ cần sửa ở đây) =====================
+   1) Firebase Console > Project settings > Your apps > Web app: copy cấu hình dán vào FIREBASE_CONFIG.
+   2) Firebase Authentication > bật Email/Password, rồi tạo 3 tài khoản bằng các email:
+        hocvien1@easygrammar.app   hocvien2@easygrammar.app   admin@easygrammar.app
+      (học viên chỉ cần gõ hocvien1, hocvien2 hoặc admin ở màn hình đăng nhập).
+   3) Firestore Database > Rules: dán nội dung file firestore.rules đi kèm.
+   Khi FIREBASE_CONFIG còn để trống, app chạy chế độ xem thử (dữ liệu chỉ lưu trong trình duyệt). */
+const FIREBASE_CONFIG = {
+  apiKey: '',
+  authDomain: '',
+  projectId: '',
+  storageBucket: '',
+  messagingSenderId: '',
+  appId: ''
+};
+const EMAIL_DOMAIN = 'easygrammar.app';   /* tên đăng nhập + @ + EMAIL_DOMAIN = email trong Firebase */
+const ADMIN_USER = 'admin';               /* tên đăng nhập của tài khoản giáo viên */
+const ACCOUNTS = {                        /* tên hiển thị; học viên mà giáo viên theo dõi = mọi tài khoản trừ admin */
+  hocvien1: { name: 'Học viên 1' },
+  hocvien2: { name: 'Học viên 2' },
+  admin: { name: 'Giáo viên' }
+};
+/* Ngày thi dùng cho thẻ đếm ngược (dự kiến 11-12/6/2027, giống lịch năm 2026). Đổi khi có lịch chính thức. */
+const EXAM = { name: 'Kỳ thi THPTQG 2027', date: '2027-06-11' };
+const LET = ['A', 'B', 'C', 'D'];
+
+/* ===================== DỮ LIỆU BÀI HỌC ===================== */
+const UNITS = [
+  {
+    id: 'u1',
+    title: 'Hiện tại đơn và hiện tại tiếp diễn',
+    desc: 'Phân biệt thói quen với việc đang xảy ra, và nhóm động từ không chia tiếp diễn.',
+    learn: [
+      {
+        title: 'Hiện tại đơn',
+        formula: 'S + V(s/es)',
+        points: [
+          'Dùng cho thói quen, sự thật hiển nhiên, lịch trình cố định.',
+          'Dấu hiệu: always, usually, often, sometimes, never, every day, on Mondays.',
+          'Chủ ngữ he/she/it thì thêm s/es vào động từ.',
+          'Phủ định: doesn\'t/don\'t + V nguyên mẫu. Nghi vấn: Does/Do + S + V?'
+        ],
+        ex: [
+          ['She walks to school every day.', 'Cô ấy đi bộ đến trường mỗi ngày.'],
+          ['Water boils at 100°C.', 'Nước sôi ở 100 độ C.']
+        ]
+      },
+      {
+        title: 'Hiện tại tiếp diễn',
+        formula: 'S + am/is/are + V-ing',
+        points: [
+          'Dùng cho việc đang xảy ra ngay lúc nói, hoặc đang diễn ra quanh thời điểm hiện tại.',
+          'Dấu hiệu: now, at the moment, right now, Look!, Listen!, Be quiet!',
+          'Phủ định: am/is/are + not + V-ing. Nghi vấn: Am/Is/Are + S + V-ing?'
+        ],
+        ex: [
+          ['Look! The baby is sleeping.', 'Nhìn kìa! Em bé đang ngủ.'],
+          ['I\'m studying for the exam this month.', 'Tháng này mình đang ôn thi.']
+        ]
+      },
+      {
+        title: 'Cách thêm đuôi',
+        formula: 'watch → watches, make → making',
+        points: [
+          'Tận cùng s, ss, sh, ch, x, o: thêm es (watch → watches, go → goes).',
+          'Phụ âm + y: đổi y thành ies (study → studies). Nguyên âm + y: chỉ thêm s (play → plays).',
+          'V-ing: bỏ e cuối (make → making). Từ ngắn kết thúc bằng phụ âm, nguyên âm, phụ âm thì gấp đôi phụ âm cuối (run → running).'
+        ],
+        ex: [
+          ['He studies English every night.', 'Anh ấy học tiếng Anh mỗi tối.'],
+          ['They are running in the park.', 'Họ đang chạy trong công viên.']
+        ]
+      }
+    ],
+    traps: [
+      'Không chia tiếp diễn với động từ chỉ trạng thái: know, understand, like, love, want, need, believe, belong. Nói I know, không nói I am knowing.',
+      'Sau doesn\'t hoặc does, động từ về nguyên mẫu: She doesn\'t like, không phải She doesn\'t likes.',
+      'Thấy always, usually, every day thì nghĩ đến hiện tại đơn. Thấy now, at the moment, Look! thì nghĩ đến hiện tại tiếp diễn.'
+    ],
+    quiz: [
+      { t: 'My brother ___ football every Sunday morning.', o: ['play', 'plays', 'is playing', 'playing'], a: 1,
+        e: 'Every Sunday morning là dấu hiệu của thói quen, nên dùng hiện tại đơn. Chủ ngữ my brother là ngôi thứ ba số ít nên động từ thêm s.' },
+      { t: 'Be quiet! The baby ___ .', o: ['sleeps', 'sleep', 'is sleeping', 'sleeping'], a: 2,
+        e: 'Be quiet! báo hiệu việc đang xảy ra ngay lúc nói, nên dùng hiện tại tiếp diễn: is sleeping.' },
+      { t: 'I ___ what you mean.', o: ['am understanding', 'understand', 'understands', 'understanding'], a: 1,
+        e: 'Understand là động từ chỉ trạng thái nên không chia tiếp diễn. Chủ ngữ I đi với understand (không thêm s).' },
+      { t: 'She usually ___ to school by bike, but today she ___ the bus.', o: ['goes / takes', 'is going / is taking', 'goes / is taking', 'go / is taking'], a: 2,
+        e: 'Usually chỉ thói quen nên dùng goes. Today (hôm nay, khác thường lệ) và việc đang diễn ra nên dùng is taking.' },
+      { t: 'Water ___ at 100 degrees Celsius.', o: ['boil', 'is boiling', 'boils', 'boiling'], a: 2,
+        e: 'Đây là sự thật khoa học nên dùng hiện tại đơn. Water là ngôi thứ ba số ít nên thêm s: boils.' },
+      { t: 'Look! It ___ heavily outside.', o: ['rains', 'rain', 'is raining', 'raining'], a: 2,
+        e: 'Look! báo hiệu việc đang diễn ra ngay lúc nói, nên dùng hiện tại tiếp diễn: is raining.' },
+      { t: 'Chọn câu đúng.', o: ['He don\'t like coffee.', 'He doesn\'t likes coffee.', 'He doesn\'t like coffee.', 'He not like coffee.'], a: 2,
+        e: 'Chủ ngữ he đi với doesn\'t, và sau doesn\'t động từ về nguyên mẫu: doesn\'t like.' },
+      { t: 'Tìm phần sai trong câu.', sentence: 'My sister <span class="seg" data-l="A">is wanting</span> <span class="seg" data-l="B">to buy</span> a new phone because <span class="seg" data-l="C">her old one</span> <span class="seg" data-l="D">doesn\'t work well</span>.',
+        o: ['is wanting', 'to buy', 'her old one', 'doesn\'t work well'], a: 0,
+        e: 'Want là động từ chỉ trạng thái nên không chia tiếp diễn. Sửa thành wants.' }
+    ]
+  },
+  {
+    id: 'u2',
+    title: 'Quá khứ đơn và quá khứ tiếp diễn',
+    desc: 'Việc đã xong trong quá khứ, và việc đang diễn ra thì có việc khác xen vào.',
+    learn: [
+      {
+        title: 'Quá khứ đơn',
+        formula: 'S + V2/V-ed',
+        points: [
+          'Dùng cho hành động đã kết thúc trong quá khứ, có thời điểm rõ ràng.',
+          'Dấu hiệu: yesterday, last week, in 2019, two days ago, when I was young.',
+          'Phủ định: didn\'t + V nguyên mẫu. Nghi vấn: Did + S + V nguyên mẫu?',
+          'Động từ bất quy tắc phải học thuộc: go – went, see – saw, buy – bought, eat – ate, take – took, have – had.'
+        ],
+        ex: [
+          ['We went to Da Nang last summer.', 'Chúng tôi đã đi Đà Nẵng hè năm ngoái.'],
+          ['Did you see the match last night?', 'Tối qua bạn có xem trận đấu không?']
+        ]
+      },
+      {
+        title: 'Quá khứ tiếp diễn',
+        formula: 'S + was/were + V-ing',
+        points: [
+          'Dùng cho hành động đang diễn ra tại một thời điểm trong quá khứ.',
+          'Khi một việc đang diễn ra thì có việc khác xen vào: việc đang diễn ra chia tiếp diễn, việc xen vào chia quá khứ đơn.',
+          'While thường đi với quá khứ tiếp diễn, when thường đi với quá khứ đơn.',
+          'I/he/she/it dùng was. You/we/they dùng were.'
+        ],
+        ex: [
+          ['I was watching TV when the phone rang.', 'Mình đang xem TV thì điện thoại reo.'],
+          ['At 8 p.m. last night, we were having dinner.', '8 giờ tối qua, chúng tôi đang ăn tối.']
+        ]
+      }
+    ],
+    traps: [
+      'Sau didn\'t hoặc did, động từ về nguyên mẫu: didn\'t go, không phải didn\'t went.',
+      'Dùng did thì bỏ -ed: Did you watch, không phải Did you watched.',
+      'Có mốc quá khứ rõ ràng (yesterday, last year, ago) thì không dùng hiện tại hoàn thành.'
+    ],
+    quiz: [
+      { t: 'We ___ to Da Nang last summer.', o: ['go', 'goes', 'went', 'have gone'], a: 2,
+        e: 'Last summer là mốc quá khứ rõ ràng nên dùng quá khứ đơn. Quá khứ của go là went.' },
+      { t: 'She ___ her homework yesterday.', o: ['didn\'t do', 'didn\'t did', 'doesn\'t do', 'not did'], a: 0,
+        e: 'Yesterday nên dùng quá khứ đơn. Phủ định là didn\'t + động từ nguyên mẫu: didn\'t do.' },
+      { t: '___ you see the match last night?', o: ['Do', 'Did', 'Were', 'Have'], a: 1,
+        e: 'Last night là mốc quá khứ, câu hỏi dùng Did + S + V nguyên mẫu.' },
+      { t: 'I ___ TV when the phone rang.', o: ['watched', 'was watching', 'am watching', 'watch'], a: 1,
+        e: 'Việc đang diễn ra (xem TV) thì có việc xen vào (điện thoại reo). Việc đang diễn ra chia quá khứ tiếp diễn: was watching.' },
+      { t: 'While we ___ dinner, the lights went out.', o: ['had', 'were having', 'have', 'are having'], a: 1,
+        e: 'While đi với việc đang diễn ra, còn went out là việc xen vào. Dùng quá khứ tiếp diễn: were having.' },
+      { t: 'Last week I ___ a new pair of shoes.', o: ['buyed', 'bought', 'buy', 'buught'], a: 1,
+        e: 'Buy là động từ bất quy tắc: buy – bought. Last week cho biết cần quá khứ đơn.' },
+      { t: 'When I was young, I ___ in a small village.', o: ['live', 'lives', 'lived', 'am living'], a: 2,
+        e: 'When I was young nói về một giai đoạn đã qua, nên dùng quá khứ đơn: lived.' },
+      { t: 'Tìm phần sai trong câu.', sentence: 'She <span class="seg" data-l="A">didn\'t went</span> <span class="seg" data-l="B">to school</span> <span class="seg" data-l="C">because</span> she <span class="seg" data-l="D">was ill</span>.',
+        o: ['didn\'t went', 'to school', 'because', 'was ill'], a: 0,
+        e: 'Sau didn\'t, động từ về nguyên mẫu. Sửa thành didn\'t go.' }
+    ]
+  },
+  {
+    id: 'u3',
+    title: 'Hiện tại hoàn thành',
+    desc: 'Trải nghiệm, for và since, và khi nào phải đổi sang quá khứ đơn.',
+    learn: [
+      {
+        title: 'Hiện tại hoàn thành',
+        formula: 'S + have/has + V3/V-ed',
+        points: [
+          'Dùng khi nói về trải nghiệm hoặc việc đã xảy ra mà không nói rõ lúc nào.',
+          'Dùng cho việc bắt đầu trong quá khứ và còn kéo dài đến hiện tại (đi với for, since).',
+          'Dùng khi kết quả của việc đó còn liên quan đến hiện tại.',
+          'Dấu hiệu: ever, never, just, already, yet, recently, so far, for, since.',
+          'He/she/it dùng has. I/you/we/they dùng have.'
+        ],
+        ex: [
+          ['I have learned English for five years.', 'Mình học tiếng Anh được năm năm rồi.'],
+          ['Have you ever been to Hue?', 'Bạn đã từng đến Huế chưa?']
+        ]
+      },
+      {
+        title: 'For và since',
+        formula: 'for + khoảng thời gian / since + mốc thời gian',
+        points: [
+          'For đi với khoảng thời gian: for two years, for a week, for a long time.',
+          'Since đi với mốc thời gian: since 2015, since Monday, since I was a child.'
+        ],
+        ex: [
+          ['She has lived here since 2015.', 'Cô ấy sống ở đây từ năm 2015.'],
+          ['They have known each other for ten years.', 'Họ quen nhau được mười năm rồi.']
+        ]
+      },
+      {
+        title: 'Khi nào dùng quá khứ đơn',
+        formula: 'Mốc quá khứ rõ ràng → quá khứ đơn',
+        points: [
+          'Yesterday, last week, in 2019, two years ago chỉ đi với quá khứ đơn.',
+          'Have been to nghĩa là đã đến rồi và đã quay về. Have gone to nghĩa là đã đi và chưa về.'
+        ],
+        ex: [
+          ['I saw him yesterday.', 'Hôm qua mình đã gặp anh ấy.'],
+          ['Mai has gone to the supermarket.', 'Mai đã đi siêu thị (chưa về).']
+        ]
+      }
+    ],
+    traps: [
+      'Không viết I have met him last week. Có last week thì dùng met.',
+      'Since + mốc thời gian, for + khoảng thời gian: since 2015 nhưng for ten years.',
+      'Has đi với he/she/it, have đi với I/you/we/they.'
+    ],
+    quiz: [
+      { t: 'I ___ English for five years.', o: ['learn', 'learned', 'have learned', 'am learning'], a: 2,
+        e: 'For five years cho thấy việc học bắt đầu từ trước và còn kéo dài đến nay, nên dùng hiện tại hoàn thành.' },
+      { t: 'She has lived here ___ 2015.', o: ['for', 'since', 'ago', 'in'], a: 1,
+        e: '2015 là mốc thời gian nên dùng since. For dùng với khoảng thời gian.' },
+      { t: 'We ___ him yesterday.', o: ['have seen', 'saw', 'has seen', 'see'], a: 1,
+        e: 'Yesterday là mốc quá khứ rõ ràng nên dùng quá khứ đơn: saw.' },
+      { t: 'Have you ___ been to Hue?', o: ['ever', 'yet', 'already', 'since'], a: 0,
+        e: 'Have you ever been to...? là mẫu hỏi về trải nghiệm. Ever nghĩa là từng.' },
+      { t: 'I haven\'t finished my homework ___ .', o: ['yet', 'already', 'ever', 'ago'], a: 0,
+        e: 'Yet đi với câu phủ định và câu hỏi của hiện tại hoàn thành, thường đứng cuối câu.' },
+      { t: 'He ___ in Hanoi two years ago.', o: ['has lived', 'lived', 'have lived', 'lives'], a: 1,
+        e: 'Two years ago là mốc quá khứ rõ ràng nên dùng quá khứ đơn: lived.' },
+      { t: 'Mai is not at home. She ___ to the supermarket.', o: ['has been', 'has gone', 'went', 'goes'], a: 1,
+        e: 'Mai không có ở nhà, nghĩa là cô ấy đã đi và chưa về. Dùng has gone to. Has been to là đã đến rồi và đã về.' },
+      { t: 'Tìm phần sai trong câu.', sentence: 'I <span class="seg" data-l="A">have met</span> <span class="seg" data-l="B">my best friend</span> <span class="seg" data-l="C">last week</span> <span class="seg" data-l="D">at the airport</span>.',
+        o: ['have met', 'my best friend', 'last week', 'at the airport'], a: 0,
+        e: 'Last week là mốc quá khứ rõ ràng nên không dùng hiện tại hoàn thành. Sửa thành met.' }
+    ]
+  }
+];
+
+
+/* ===================== PHẦN 1: TỪ LOẠI VÀ CẤU TẠO TỪ =====================
+   Chuyển thể từ tài liệu "Tổng quát ngữ pháp tiếng Anh" (The Forum Center), Phần 1.
+   Bài tập trong tài liệu được đổi sang dạng chọn đáp án và tìm lỗi sai như đề THPTQG. */
+const SEG = (l, t) => `<span class="seg" data-l="${l}">${t}</span>`;
+const SRC1 = `Nội dung theo tài liệu Tổng quát ngữ pháp tiếng Anh (The Forum Center), Phần 1: Từ loại và cấu tạo từ.`;
+
+const PHAN1 = [
+  /* ---------- u4: Từ loại và vị trí ---------- */
+  {
+    id: 'u4',
+    title: `Từ loại và vị trí trong câu`,
+    desc: `Nhận ra 8 từ loại và chọn đúng loại từ theo vị trí của chỗ trống.`,
+    src: SRC1,
+    learn: [
+      {
+        title: `Tám từ loại chính`,
+        formula: `noun, pronoun, verb, adjective, adverb, preposition, conjunction, article`,
+        points: [
+          `Danh từ gọi tên người, nơi chốn, sự vật, ý tưởng: teacher, city, book, freedom.`,
+          `Đại từ thay cho danh từ để khỏi lặp lại: he, she, it, they, who.`,
+          `Động từ chỉ hành động hoặc trạng thái: run, eat, think, is/am/are.`,
+          `Tính từ mô tả danh từ hoặc đại từ: happy, large, blue.`,
+          `Trạng từ bổ nghĩa cho động từ, tính từ hoặc trạng từ khác: quickly, very, carefully, always.`,
+          `Giới từ chỉ quan hệ giữa danh từ hoặc đại từ với phần còn lại của câu: in, on, at, under, between.`,
+          `Liên từ nối từ, cụm từ hoặc mệnh đề: and, but, because, although, if.`,
+          `Mạo từ cho biết danh từ được dùng theo nghĩa xác định hay không xác định: a, an, the.`
+        ],
+        ex: [
+          [`The teacher walks to the city quickly.`, `Cô giáo đi nhanh đến thành phố.`]
+        ]
+      },
+      {
+        title: `Vị trí điển hình của từ loại`,
+        formula: `Nhìn vị trí của chỗ trống để chọn loại từ`,
+        points: [
+          `Sau mạo từ hoặc tính từ sở hữu (a, the, my, her): danh từ, có thể có tính từ đứng trước. Ví dụ: the development, her decision.`,
+          `Trước danh từ: tính từ. Ví dụ: a successful woman.`,
+          `Sau động từ liên kết (be, feel, seem, become, look): tính từ. Ví dụ: She feels happy.`,
+          `Bổ nghĩa cho động từ thường: trạng từ. Ví dụ: She drives carefully.`,
+          `Trước tính từ hoặc trạng từ khác: trạng từ. Ví dụ: extremely important.`,
+          `Sau động từ khuyết thiếu (can, must...): động từ nguyên thể không “to”. Ví dụ: She must go now.`
+        ],
+        ex: [
+          [`She feels happy.`, `Cô ấy cảm thấy vui.`],
+          [`She must go now.`, `Cô ấy phải đi ngay bây giờ.`]
+        ]
+      },
+      {
+        title: `Tính từ hay trạng từ`,
+        formula: `Adjective + Noun, Verb + Adverb`,
+        points: [
+          `Tính từ mô tả danh từ: đứng trước danh từ hoặc sau động từ liên kết.`,
+          `Trạng từ mô tả động từ, tính từ hoặc trạng từ khác.`,
+          `Một số từ có đuôi -ly vẫn là tính từ: friendly, lovely, lonely, costly, likely.`,
+          `Một số từ vừa là tính từ vừa là trạng từ: fast, hard, late, early. Riêng hardly nghĩa là “hầu như không”, khác hẳn hard.`
+        ],
+        ex: [
+          [`She is a talented singer.`, `Cô ấy là một ca sĩ tài năng.`],
+          [`She sings beautifully.`, `Cô ấy hát rất hay.`]
+        ]
+      }
+    ],
+    traps: [
+      `Sau động từ liên kết (feel, seem, look, become) dùng tính từ, không dùng trạng từ: She feels happy, không phải She feels happily.`,
+      `Từ bổ nghĩa cho động từ thường phải là trạng từ: She sings beautifully, không phải She sings beautiful.`,
+      `Thấy đuôi -ly thì chưa chắc là trạng từ: friendly, lovely, lonely là tính từ.`
+    ],
+    quiz: [
+      { t: `She is a ___ singer.`, o: [`talent`, `talented`, `talentedly`, `talents`], a: 1,
+        e: `Trước danh từ singer cần tính từ. Talented là tính từ, nghĩa là có tài.` },
+      { t: `She sings ___ .`, o: [`beautiful`, `beauty`, `beautifully`, `beautify`], a: 2,
+        e: `Từ bổ nghĩa cho động từ sings phải là trạng từ: beautifully.` },
+      { t: `She feels ___ today.`, o: [`happy`, `happily`, `happiness`, `to happy`], a: 0,
+        e: `Feel là động từ liên kết nên sau nó dùng tính từ: happy.` },
+      { t: `Her ___ to leave was difficult.`, o: [`decide`, `decision`, `decisive`, `decisively`], a: 1,
+        e: `Sau tính từ sở hữu her cần danh từ: decision.` },
+      { t: `It is ___ important to check your answers.`, o: [`extreme`, `extremely`, `extremity`, `extremes`], a: 1,
+        e: `Trước tính từ important cần trạng từ bổ nghĩa: extremely.` },
+      { t: `She must ___ now.`, o: [`goes`, `going`, `go`, `to go`], a: 2,
+        e: `Sau động từ khuyết thiếu must dùng động từ nguyên thể không “to”: go.` },
+      { t: `Từ nào dưới đây là tính từ?`, o: [`quickly`, `lovely`, `carefully`, `always`], a: 1,
+        e: `Lovely có đuôi -ly nhưng là tính từ. Quickly, carefully và always là trạng từ.` },
+      { t: `Tìm phần sai trong câu.`, sentence: `My brother ${SEG('A', 'drives')} ${SEG('B', 'very')} ${SEG('C', 'careful')} ${SEG('D', 'to school')}.`,
+        o: [`drives`, `very`, `careful`, `to school`], a: 2,
+        e: `Careful bổ nghĩa cho động từ drives nên phải là trạng từ carefully.` }
+    ]
+  },
+
+  /* ---------- u5: Danh từ, mạo từ, đại từ ---------- */
+  {
+    id: 'u5',
+    title: `Danh từ, mạo từ và đại từ`,
+    desc: `Số nhiều, danh từ không đếm được, a/an/the và các lỗi đại từ hay gặp.`,
+    src: SRC1,
+    learn: [
+      {
+        title: `Danh từ: số nhiều và không đếm được`,
+        formula: `child → children, advice (không thêm s)`,
+        points: [
+          `Một số danh từ có số nhiều bất quy tắc: child → children.`,
+          `Danh từ đếm được số nhiều phải thêm s/es: several books.`,
+          `Danh từ không đếm được không thêm s và không đi với a/an: advice, information, equipment, furniture, research, knowledge.`
+        ],
+        ex: [
+          [`She has many children.`, `Cô ấy có nhiều con.`],
+          [`I need some advice.`, `Mình cần một vài lời khuyên.`]
+        ]
+      },
+      {
+        title: `Mạo từ a, an, the`,
+        formula: `a/an chọn theo ÂM đầu, không theo chữ cái`,
+        points: [
+          `Danh từ đếm được số ít cần có mạo từ hoặc từ hạn định: She bought a book.`,
+          `Chọn a hay an theo âm đầu: a European (âm /j/ là phụ âm), an hour (h không đọc), an honest man.`,
+          `Go to school chỉ việc đi học, không dùng the. The school chỉ một ngôi trường cụ thể.`
+        ],
+        ex: [
+          [`He is a European.`, `Anh ấy là người châu Âu.`],
+          [`She goes to school every day.`, `Cô ấy đi học mỗi ngày.`]
+        ]
+      },
+      {
+        title: `Đại từ`,
+        formula: `I, he, she, we, they làm chủ ngữ. its khác it's`,
+        points: [
+          `Làm chủ ngữ phải dùng đại từ chủ cách: He and I went to the park, không phải Me and him.`,
+          `It's là it is hoặc it has. Its là tính từ sở hữu: The dog wagged its tail.`,
+          `Đại từ phản thân dùng khi chủ ngữ và tân ngữ là cùng một người: She looked at herself in the mirror.`
+        ],
+        ex: [
+          [`He and I went to the park.`, `Tôi và anh ấy đã đến công viên.`],
+          [`The dog wagged its tail.`, `Con chó vẫy đuôi.`]
+        ]
+      }
+    ],
+    traps: [
+      `Không thêm s vào danh từ không đếm được: advice, information, equipment, furniture. Nói some advice, không nói some advices.`,
+      `Chọn a hay an theo âm đầu: a European, an hour.`,
+      `Its (của nó) khác it's (it is). Nếu thay được bằng it is thì mới dùng it's.`
+    ],
+    quiz: [
+      { t: `She has many ___ .`, o: [`child`, `childs`, `children`, `childrens`], a: 2,
+        e: `Child có số nhiều bất quy tắc là children.` },
+      { t: `I need some ___ about the course.`, o: [`advices`, `advice`, `an advice`, `advise`], a: 1,
+        e: `Advice là danh từ không đếm được nên không thêm s và không dùng an. Advise là động từ.` },
+      { t: `There are several ___ on the table.`, o: [`book`, `books`, `a book`, `booking`], a: 1,
+        e: `Several đi với danh từ đếm được số nhiều nên thêm s: books.` },
+      { t: `He is ___ European.`, o: [`an`, `a`, `the`, `(không dùng mạo từ)`], a: 1,
+        e: `European bắt đầu bằng âm /j/, là một phụ âm, nên dùng a. Chọn a hay an theo âm đầu, không theo chữ cái.` },
+      { t: `She goes to ___ school every day.`, o: [`the`, `a`, `an`, `(không dùng mạo từ)`], a: 3,
+        e: `Go to school chỉ việc đi học nên không dùng mạo từ. The school chỉ một ngôi trường cụ thể.` },
+      { t: `The dog wagged ___ tail.`, o: [`it's`, `its`, `it`, `itself`], a: 1,
+        e: `Its là tính từ sở hữu, nghĩa là của nó. It's chỉ dùng khi muốn nói it is hoặc it has.` },
+      { t: `Chọn câu đúng.`, o: [`Me and him went to the park.`, `Him and me went to the park.`, `He and I went to the park.`, `He and me went to the park.`], a: 2,
+        e: `Làm chủ ngữ phải dùng đại từ chủ cách (I, he, she, we, they): He and I.` },
+      { t: `Tìm phần sai trong câu.`, sentence: `${SEG('A', 'She')} ${SEG('B', 'looked at')} ${SEG('C', 'hers')} ${SEG('D', 'in the mirror')}.`,
+        o: [`She`, `looked at`, `hers`, `in the mirror`], a: 2,
+        e: `Chủ ngữ và tân ngữ cùng là một người nên dùng đại từ phản thân herself.` }
+    ]
+  },
+
+  /* ---------- u6: Động từ, tính từ, trạng từ ---------- */
+  {
+    id: 'u6',
+    title: `Động từ, tính từ và trạng từ`,
+    desc: `Động từ sau modal, to V hay V-ing, so sánh nhất và vị trí trạng từ tần suất.`,
+    src: SRC1,
+    learn: [
+      {
+        title: `Dạng động từ đi sau`,
+        formula: `modal + V, want + to V, enjoy + V-ing`,
+        points: [
+          `Sau must, can, should... dùng động từ nguyên thể không “to”: She must go now.`,
+          `Sau want, decide, hope, plan, agree, refuse, manage, afford dùng to + V.`,
+          `Sau enjoy, avoid, finish, suggest, consider, mind, deny, look forward to dùng V-ing.`
+        ],
+        ex: [
+          [`She must go now.`, `Cô ấy phải đi ngay bây giờ.`],
+          [`I want to learn English.`, `Mình muốn học tiếng Anh.`],
+          [`She enjoys reading books.`, `Cô ấy thích đọc sách.`]
+        ]
+      },
+      {
+        title: `Tính từ và trạng từ hay nhầm`,
+        formula: `Verb + Adverb, Linking verb + Adjective`,
+        points: [
+          `Từ bổ nghĩa cho động từ thường phải là trạng từ: She sings beautifully.`,
+          `Sau động từ liên kết (feel, seem, look, become) dùng tính từ: She feels happy.`,
+          `Thiếu trạng từ cũng là lỗi: She drives carefully, không phải She drives careful.`
+        ],
+        ex: [
+          [`She sings beautifully.`, `Cô ấy hát rất hay.`],
+          [`She feels happy.`, `Cô ấy cảm thấy vui.`]
+        ]
+      },
+      {
+        title: `So sánh nhất và trạng từ tần suất`,
+        formula: `the most + adj, always + V, be + always`,
+        points: [
+          `So sánh trong một nhóm từ ba đối tượng trở lên thì dùng so sánh nhất: She is the most intelligent student in the class.`,
+          `Trạng từ tần suất (always, usually, often...) đứng trước động từ thường và sau động từ to be.`
+        ],
+        ex: [
+          [`She is the most intelligent student in the class.`, `Cô ấy là học sinh thông minh nhất lớp.`],
+          [`He always speaks English fluently.`, `Anh ấy luôn nói tiếng Anh trôi chảy.`],
+          [`She is always on time.`, `Cô ấy lúc nào cũng đúng giờ.`]
+        ]
+      }
+    ],
+    traps: [
+      `Sau modal không chia động từ và không thêm to: must go, không phải must goes hay must to go.`,
+      `Enjoy + V-ing, không phải enjoy to read. Want + to V, không phải want learning.`,
+      `Trạng từ tần suất đứng trước động từ thường, không đứng cuối câu: He always speaks English fluently.`
+    ],
+    quiz: [
+      { t: `She must ___ now.`, o: [`goes`, `go`, `to go`, `going`], a: 1,
+        e: `Sau động từ khuyết thiếu must dùng động từ nguyên thể không “to”: go.` },
+      { t: `I want ___ English.`, o: [`learning`, `learn`, `to learn`, `learned`], a: 2,
+        e: `Sau want dùng to + động từ nguyên thể: to learn.` },
+      { t: `She enjoys ___ books.`, o: [`to read`, `read`, `reads`, `reading`], a: 3,
+        e: `Sau enjoy dùng V-ing: reading.` },
+      { t: `Chọn câu đúng.`, o: [`He speaks English fluently always.`, `He always speaks English fluently.`, `He speaks fluently English always.`, `Always he speaks English fluently.`], a: 1,
+        e: `Trạng từ tần suất always đứng trước động từ thường: He always speaks.` },
+      { t: `She looks ___ in her new dress.`, o: [`beautifully`, `beautiful`, `beauty`, `beautify`], a: 1,
+        e: `Look là động từ liên kết nên sau nó dùng tính từ: beautiful.` },
+      { t: `She is ___ student in the class.`, o: [`more intelligent`, `the most intelligent`, `most intelligent`, `the more intelligent`], a: 1,
+        e: `So sánh trong cả lớp (từ ba người trở lên) dùng so sánh nhất: the most intelligent.` },
+      { t: `She drives ___ .`, o: [`careful`, `carefully`, `care`, `carefulness`], a: 1,
+        e: `Từ bổ nghĩa cho động từ drives phải là trạng từ: carefully.` },
+      { t: `Tìm phần sai trong câu.`, sentence: `I ${SEG('A', 'look forward to')} ${SEG('B', 'meet')} ${SEG('C', 'you')} ${SEG('D', 'next week')}.`,
+        o: [`look forward to`, `meet`, `you`, `next week`], a: 1,
+        e: `Sau look forward to dùng V-ing, nên meet phải sửa thành meeting.` }
+    ]
+  },
+
+  /* ---------- u7: Giới từ và liên từ ---------- */
+  {
+    id: 'u7',
+    title: `Giới từ và liên từ`,
+    desc: `Giới từ đi theo cụm cố định, lỗi thiếu hoặc thừa giới từ, và chọn liên từ đúng nghĩa.`,
+    src: SRC1,
+    learn: [
+      {
+        title: `Giới từ đi theo cụm cố định`,
+        formula: `good at, interested in, afraid of`,
+        points: [
+          `Nhiều giới từ đi cố định với từ đứng trước, nên học theo cụm: good at, interested in, afraid of, wait for, look for, apologize for, belong to.`,
+          `Thiếu giới từ sau động từ là lỗi: They are looking for the keys, không phải They are looking the keys.`,
+          `Thừa giới từ cũng là lỗi: Where did you go yesterday?, không cần thêm to.`
+        ],
+        ex: [
+          [`She is good at mathematics.`, `Cô ấy giỏi toán.`],
+          [`They are looking for the keys.`, `Họ đang tìm chìa khóa.`],
+          [`She is interested in art.`, `Cô ấy quan tâm đến nghệ thuật.`]
+        ]
+      },
+      {
+        title: `Liên từ: chọn theo nghĩa`,
+        formula: `because + nguyên nhân, so + kết quả`,
+        points: [
+          `Because giới thiệu nguyên nhân, so giới thiệu kết quả: I am tired because I didn't sleep well. / I didn't sleep well, so I am tired.`,
+          `But và yet nối hai ý đối lập: He is smart, but he is lazy. She studied hard, yet she failed the exam.`,
+          `Or dùng để nêu lựa chọn, không dùng để nối hai ý đối lập.`
+        ],
+        ex: [
+          [`He is smart, but he is lazy.`, `Anh ấy thông minh nhưng lười.`],
+          [`She studied hard, yet she failed the exam.`, `Cô ấy học chăm chỉ nhưng vẫn trượt kỳ thi.`]
+        ]
+      }
+    ],
+    traps: [
+      `Học giới từ theo cụm cố định: good at, không phải good in.`,
+      `Because chỉ nguyên nhân, so chỉ kết quả. Đừng đảo ngược hai từ này.`,
+      `Hai ý đối lập bất ngờ thì dùng yet hoặc but, không dùng or.`
+    ],
+    quiz: [
+      { t: `She is good ___ mathematics.`, o: [`in`, `at`, `on`, `for`], a: 1,
+        e: `Good at là cụm cố định, nghĩa là giỏi về một lĩnh vực.` },
+      { t: `They lost their keys, so they are looking ___ them.`, o: [`at`, `for`, `to`, `in`], a: 1,
+        e: `Look for nghĩa là tìm kiếm. Không có giới từ thì câu thiếu nghĩa tìm.` },
+      { t: `He apologized ___ being late.`, o: [`to`, `of`, `for`, `with`], a: 2,
+        e: `Apologize for + V-ing nghĩa là xin lỗi vì điều gì.` },
+      { t: `The book belongs ___ me.`, o: [`to`, `of`, `at`, `for`], a: 0,
+        e: `Belong to nghĩa là thuộc về.` },
+      { t: `I am tired ___ I didn't sleep well.`, o: [`because`, `so`, `but`, `or`], a: 0,
+        e: `Vế sau là nguyên nhân của việc mệt, nên dùng because. So đứng trước vế chỉ kết quả.` },
+      { t: `Chọn câu đúng.`, o: [`Where did you go to yesterday?`, `Where did you go yesterday?`, `Where you did go yesterday?`, `Where did you went yesterday?`], a: 1,
+        e: `Go yesterday không cần giới từ to, vì where đã chỉ nơi chốn.` },
+      { t: `He is smart, ___ he is lazy.`, o: [`so`, `because`, `but`, `or`], a: 2,
+        e: `Thông minh nhưng lười là hai ý đối lập, nên dùng but.` },
+      { t: `Tìm phần sai trong câu.`, sentence: `${SEG('A', 'She')} ${SEG('B', 'studied hard')}, ${SEG('C', 'or')} ${SEG('D', 'she failed the exam')}.`,
+        o: [`She`, `studied hard`, `or`, `she failed the exam`], a: 2,
+        e: `Học chăm chỉ nhưng vẫn trượt là hai ý đối lập bất ngờ, nên dùng yet hoặc but, không dùng or.` }
+    ]
+  },
+
+  /* ---------- u8: Cấu tạo từ ---------- */
+  {
+    id: 'u8',
+    title: `Cấu tạo từ: tiền tố và hậu tố`,
+    desc: `Đoán loại từ nhờ hậu tố và chọn đúng tiền tố phủ định để điền dạng từ.`,
+    src: SRC1,
+    learn: [
+      {
+        title: `Tiền tố thay đổi nghĩa`,
+        formula: `un-, in-, im-, ir-, il-, dis-, re-, mis-`,
+        points: [
+          `un-, in-, im-, ir-, il- mang nghĩa phủ định: happy → unhappy, possible → impossible, responsible → irresponsible, legal → illegal.`,
+          `dis- chỉ nghĩa trái ngược: agree → disagree. Re- nghĩa là làm lại: write → rewrite. Mis- nghĩa là làm sai: understand → misunderstand.`,
+          `Over- là quá mức, under- là dưới mức: overestimate, underestimate.`,
+          `Từ bắt đầu bằng r thường dùng ir-, bằng l dùng il-, bằng p hoặc m dùng im-.`
+        ],
+        ex: [
+          [`He is irresponsible.`, `Anh ấy thiếu trách nhiệm.`],
+          [`It is impossible to finish today.`, `Hôm nay không thể hoàn thành.`]
+        ]
+      },
+      {
+        title: `Hậu tố thay đổi loại từ`,
+        formula: `success → successful, improve → improvement`,
+        points: [
+          `Danh từ chỉ người: -er, -or, -ist, -ant (teach → teacher, act → actor).`,
+          `Danh từ chỉ sự việc, trạng thái: -ment, -tion, -ness, -ity, -ance (improve → improvement, happy → happiness, perform → performance).`,
+          `Tính từ: -ful, -less, -ive, -ous, -al, -able (success → successful, create → creative).`,
+          `Động từ: -en, -ize/-ise, -ify (strength → strengthen, modern → modernize).`,
+          `Trạng từ: -ly (quick → quickly, profession → professionally).`
+        ],
+        ex: [
+          [`She is a successful woman.`, `Cô ấy là một phụ nữ thành đạt.`],
+          [`They made a great improvement.`, `Họ đã tạo ra một bước cải thiện lớn.`]
+        ]
+      },
+      {
+        title: `Cách chọn dạng từ trong câu`,
+        formula: `Xem vị trí, chọn loại từ, rồi chọn hậu tố`,
+        points: [
+          `Bước 1: xác định chỗ trống giữ chức năng gì (danh từ, tính từ, trạng từ hay động từ).`,
+          `Bước 2: nhìn hậu tố và tiền tố để biết loại từ và nghĩa.`,
+          `Bước 3: tra từ điển nếu chưa chắc, rồi đặt câu với từ mới học.`,
+          `Ví dụ: sau tính từ great cần danh từ improvement, không phải động từ improve.`
+        ],
+        ex: [
+          [`Her performance was outstanding.`, `Phần trình diễn của cô ấy rất xuất sắc.`],
+          [`She acted professionally.`, `Cô ấy cư xử một cách chuyên nghiệp.`]
+        ]
+      }
+    ],
+    traps: [
+      `Không viết a success woman. Trước danh từ woman cần tính từ successful.`,
+      `Chọn tiền tố phủ định theo chữ cái đầu: irresponsible, illegal, impossible, không phải inresponsible.`,
+      `Sau tính từ cần danh từ, không dùng động từ gốc: a great improvement, không phải a great improve.`
+    ],
+    quiz: [
+      { t: `Her ___ was outstanding.`, o: [`perform`, `performance`, `performs`, `performed`], a: 1,
+        e: `Sau tính từ sở hữu her cần danh từ: performance (perform + -ance).` },
+      { t: `He is very ___ and always has new ideas.`, o: [`create`, `creative`, `creation`, `creatively`], a: 1,
+        e: `Sau is very cần tính từ: creative (create + -ive).` },
+      { t: `They need to ___ their teamwork skills.`, o: [`strength`, `strong`, `strengthen`, `strongly`], a: 2,
+        e: `Sau need to cần động từ: strengthen (strength + -en).` },
+      { t: `The project was a great ___ .`, o: [`succeed`, `successful`, `success`, `successfully`], a: 2,
+        e: `Sau tính từ great cần danh từ: success.` },
+      { t: `She acted ___ during the interview.`, o: [`profession`, `professional`, `professionally`, `professionalism`], a: 2,
+        e: `Từ bổ nghĩa cho động từ acted là trạng từ: professionally (professional + -ly).` },
+      { t: `He is very ___ . He never finishes his tasks.`, o: [`responsible`, `inresponsible`, `irresponsible`, `unresponsible`], a: 2,
+        e: `Phủ định của responsible là irresponsible. Từ bắt đầu bằng r dùng tiền tố ir-.` },
+      { t: `It is ___ to finish this work in one hour. It needs at least five hours.`, o: [`possible`, `impossible`, `unpossible`, `dispossible`], a: 1,
+        e: `Cần năm giờ mà chỉ có một giờ, nên là impossible. Từ bắt đầu bằng p dùng tiền tố im-.` },
+      { t: `Tìm phần sai trong câu.`, sentence: `She ${SEG('A', 'is')} ${SEG('B', 'a')} ${SEG('C', 'success')} ${SEG('D', 'woman')}.`,
+        o: [`is`, `a`, `success`, `woman`], a: 2,
+        e: `Trước danh từ woman cần tính từ successful, không phải danh từ success.` }
+    ]
+  }
+];
+
+/* Phần 1 là nền tảng nên đặt lên đầu danh sách bài */
+UNITS.unshift(...PHAN1);
+
+/* ===================== HÀM DỰNG NHANH DỮ LIỆU BÀI ===================== */
+const L = (title, formula, points, ex) => ({ title, formula, points, ex });
+const Q = (t, o, a, e) => ({ t, o, a, e });
+const ERR = (prefix, segs, suffix, a, e) => ({
+  t: `Tìm phần sai trong câu.`,
+  sentence: (prefix ? prefix + ' ' : '') + segs.map((s, i) => SEG(LET[i], s)).join(' ') + suffix,
+  o: segs, a, e
+});
+const mkIn = src => (id, title, desc, learn, traps, quiz) => ({ id, title, desc, learn, traps, quiz, src });
+
+/* ===================== PHẦN 2: CÁC KIỂU CÂU VÀ DẤU CÂU ===================== */
+const mk2 = mkIn(`Nội dung theo tài liệu Tổng quát ngữ pháp tiếng Anh (The Forum Center), Phần 2: Các kiểu câu và dấu câu.`);
+const PHAN2 = [
+  mk2('u9', `Mệnh đề và bốn kiểu câu`, `Phân biệt mệnh đề độc lập, mệnh đề phụ thuộc và bốn kiểu câu cơ bản.`, [
+    L(`Mệnh đề độc lập và mệnh đề phụ thuộc`, `Clause = chủ ngữ + động từ`, [
+      `Mệnh đề là một nhóm từ có chủ ngữ và động từ.`,
+      `Mệnh đề độc lập diễn đạt ý hoàn chỉnh và đứng riêng được như một câu: She reads books.`,
+      `Mệnh đề phụ thuộc không đứng riêng được, phải gắn với mệnh đề độc lập. Thường mở đầu bằng liên từ phụ thuộc hoặc đại từ quan hệ: because she loves stories.`
+    ], [[`She reads books.`, `Cô ấy đọc sách.`], [`because she loves stories`, `vì cô ấy yêu thích truyện (chưa thành câu)`]]),
+    L(`Bốn kiểu câu`, `đơn, ghép, phức, ghép phức`, [
+      `Câu đơn: 1 mệnh đề độc lập. She reads books.`,
+      `Câu ghép: từ 2 mệnh đề độc lập trở lên. She reads books, and he writes poems.`,
+      `Câu phức: 1 mệnh đề độc lập và ít nhất 1 mệnh đề phụ thuộc. She reads books because she loves stories.`,
+      `Câu ghép phức: từ 2 mệnh đề độc lập và ít nhất 1 mệnh đề phụ thuộc. Although I was tired, I finished my work, and I went to bed.`
+    ], [[`She reads books, and he writes poems.`, `Cô ấy đọc sách còn anh ấy viết thơ.`], [`She reads books because she loves stories.`, `Cô ấy đọc sách vì yêu thích truyện.`]])
+  ], [
+    `Mệnh đề phụ thuộc đứng một mình là câu thiếu (sentence fragment): While driving to work. Cần thêm mệnh đề chính.`,
+    `Đếm mệnh đề độc lập để xác định kiểu câu: 1 mệnh đề là câu đơn hoặc câu phức, từ 2 mệnh đề trở lên là câu ghép hoặc câu ghép phức.`,
+    `Có mệnh đề phụ thuộc thì là câu phức hoặc câu ghép phức, không phải câu đơn.`
+  ], [
+    Q(`Nhóm từ nào dưới đây là mệnh đề độc lập?`, [`because she loves stories`, `She reads books`, `when he arrived`, `although it rained`], 1, `She reads books có chủ ngữ, động từ và diễn đạt ý hoàn chỉnh. Ba nhóm còn lại mở đầu bằng liên từ phụ thuộc nên không đứng riêng được.`),
+    Q(`She reads books because she loves stories. Đây là kiểu câu nào?`, [`Câu đơn`, `Câu ghép`, `Câu phức`, `Câu ghép phức`], 2, `Có 1 mệnh đề độc lập (She reads books) và 1 mệnh đề phụ thuộc (because she loves stories) nên là câu phức.`),
+    Q(`She reads books, and he writes poems. Đây là kiểu câu nào?`, [`Câu đơn`, `Câu ghép`, `Câu phức`, `Câu ghép phức`], 1, `Hai mệnh đề độc lập nối bằng and, không có mệnh đề phụ thuộc nên là câu ghép.`),
+    Q(`Although I was tired, I finished my work, and I went to bed. Đây là kiểu câu nào?`, [`Câu đơn`, `Câu ghép`, `Câu phức`, `Câu ghép phức`], 3, `Có 2 mệnh đề độc lập (I finished my work; I went to bed) và 1 mệnh đề phụ thuộc (Although I was tired).`),
+    Q(`Câu nào dưới đây là câu thiếu, chưa có mệnh đề chính?`, [`While driving to work, she listened to the radio.`, `While driving to work.`, `She listened to the radio while driving.`, `She was driving to work.`], 1, `While driving to work là mệnh đề phụ thuộc đứng một mình nên chưa thành câu hoàn chỉnh.`),
+    Q(`The dog barked loudly. Đây là kiểu câu nào?`, [`Câu đơn`, `Câu ghép`, `Câu phức`, `Câu ghép phức`], 0, `Chỉ có 1 mệnh đề độc lập (chủ ngữ the dog, động từ barked) nên là câu đơn.`)
+  ]),
+
+  mk2('u10', `Câu đơn: chủ ngữ ghép và vị ngữ ghép`, `Cấu trúc câu đơn và cách nhận ra chủ ngữ ghép, vị ngữ ghép.`, [
+    L(`Cấu trúc câu đơn`, `S + V + (O) + (trạng ngữ)`, [
+      `Câu đơn chỉ có một mệnh đề độc lập, tức là một chủ ngữ và một động từ. Tân ngữ có thể có hoặc không.`,
+      `Luôn xác định được chủ ngữ và động từ chính, và câu phải truyền đạt ý hoàn chỉnh.`
+    ], [[`The dog barked loudly.`, `Con chó sủa to.`], [`They played basketball after school.`, `Họ chơi bóng rổ sau giờ học.`]]),
+    L(`Chủ ngữ ghép và vị ngữ ghép`, `S1 and S2 + V, S + V1 and V2`, [
+      `Chủ ngữ ghép: hai hoặc nhiều chủ ngữ dùng chung một động từ. John and Mary went to the store.`,
+      `Vị ngữ ghép: hai hoặc nhiều động từ dùng chung một chủ ngữ. She danced and sang at the concert.`,
+      `Có thể có cả hai: Tom and Jerry ran and hid.`,
+      `Dù có nhiều chủ ngữ hoặc nhiều động từ, câu vẫn là câu đơn nếu chỉ có một mệnh đề.`
+    ], [[`John and Mary went to the store.`, `John và Mary đã đi đến cửa hàng.`], [`She danced and sang at the concert.`, `Cô ấy đã nhảy và hát tại buổi hòa nhạc.`]])
+  ], [
+    `Hai động từ nối bằng and dùng chung một chủ ngữ vẫn là câu đơn, không cần dấu phẩy: She danced and sang.`,
+    `Hai chủ ngữ nối bằng and dùng chung một động từ vẫn là câu đơn: John and Mary went.`,
+    `Muốn là câu ghép thì phải có từ hai mệnh đề, mỗi mệnh đề có chủ ngữ và động từ riêng.`
+  ], [
+    Q(`Câu nào là câu đơn?`, [`She reads books, and he writes poems.`, `She danced and sang at the concert.`, `She stayed home because she was ill.`, `Although it rained, they went out.`], 1, `Chỉ có một chủ ngữ she và hai động từ danced, sang nên là một mệnh đề (vị ngữ ghép).`),
+    Q(`John and Mary went to the store. Câu này có gì đặc biệt?`, [`Chủ ngữ ghép`, `Vị ngữ ghép`, `Mệnh đề phụ thuộc`, `Hai mệnh đề độc lập`], 0, `John and Mary là hai chủ ngữ dùng chung động từ went.`),
+    Q(`She danced and sang at the concert. Câu này có gì đặc biệt?`, [`Chủ ngữ ghép`, `Vị ngữ ghép`, `Mệnh đề phụ thuộc`, `Hai mệnh đề độc lập`], 1, `Danced và sang là hai động từ dùng chung chủ ngữ she.`),
+    Q(`Tom and Jerry ran and hid. Đây là kiểu câu nào?`, [`Câu đơn có cả chủ ngữ ghép và vị ngữ ghép`, `Câu ghép`, `Câu phức`, `Câu ghép phức`], 0, `Chỉ có một mệnh đề, với hai chủ ngữ và hai động từ.`),
+    Q(`Chọn câu đơn.`, [`They played basketball after school.`, `They played basketball, and we watched.`, `They played basketball because it was sunny.`, `When they played basketball, we watched.`], 0, `Chỉ có một chủ ngữ they và một động từ played. After school chỉ là trạng ngữ.`),
+    Q(`Chủ ngữ và động từ chính của câu The dog barked loudly lần lượt là gì?`, [`dog, loudly`, `The dog, barked`, `barked, The dog`, `loudly, barked`], 1, `The dog là chủ ngữ, barked là động từ chính, loudly là trạng từ.`)
+  ]),
+
+  mk2('u11', `Câu ghép: FANBOYS và dấu chấm phẩy`, `Nối hai mệnh đề độc lập bằng liên từ kết hợp hoặc dấu chấm phẩy.`, [
+    L(`Liên từ kết hợp FANBOYS`, `for, and, nor, but, or, yet, so`, [
+      `For (vì, nguyên nhân): He stayed home, for he was ill.`,
+      `And (và, bổ sung): She loves reading, and he enjoys writing.`,
+      `Nor (cũng không, phủ định bổ sung): He doesn't smoke, nor does he drink.`,
+      `But (nhưng, đối lập): I wanted to go for a walk, but it started to rain.`,
+      `Or (hoặc, lựa chọn): Hurry up, or you will miss the bus.`,
+      `Yet (nhưng mà, đối lập bất ngờ): He is rich, yet he is unhappy.`,
+      `So (vì vậy, kết quả): He studies hard, so he gets good grades.`
+    ], [[`I wanted to go for a walk, but it started to rain.`, `Tôi muốn đi dạo nhưng trời bắt đầu mưa.`], [`He studies hard, so he gets good grades.`, `Anh ấy học chăm nên đạt điểm tốt.`]]),
+    L(`Cấu trúc và dấu câu`, `Clause , FANBOYS clause`, [
+      `Mệnh đề độc lập, liên từ kết hợp, mệnh đề độc lập: có dấu phẩy đứng trước liên từ.`,
+      `Có thể nối bằng dấu chấm phẩy: The rent is high; the location is excellent.`,
+      `Dấu chấm phẩy, however/therefore/moreover, dấu phẩy: The rent is high; however, the location is excellent.`,
+      `Không dùng dấu phẩy khi chỉ nối hai từ hoặc cụm từ đơn lẻ: I like coffee and tea.`
+    ], [[`The rent is high; however, the location is excellent.`, `Tiền thuê cao; tuy nhiên vị trí rất tốt.`], [`I like coffee and tea.`, `Tôi thích cà phê và trà.`]])
+  ], [
+    `Không nối hai mệnh đề độc lập chỉ bằng dấu phẩy (lỗi comma splice). Sai: It was late, we went home. Đúng: It was late, so we went home.`,
+    `Đặt dấu phẩy trước liên từ kết hợp khi nối hai mệnh đề độc lập.`,
+    `Chọn liên từ theo nghĩa: but và yet cho ý đối lập, so cho kết quả, for cho nguyên nhân.`
+  ], [
+    Q(`It was late, ___ we went home.`, [`but`, `so`, `or`, `nor`], 1, `Về muộn là nguyên nhân, đi về là kết quả nên dùng so.`),
+    Q(`I wanted to go for a walk, ___ it started to rain.`, [`so`, `or`, `but`, `nor`], 2, `Muốn đi dạo nhưng trời mưa là hai ý đối lập nên dùng but.`),
+    Q(`Chọn câu đúng.`, [`It was late, we went home.`, `It was late, so we went home.`, `It was late so, we went home.`, `It was late; so, we went home.`], 1, `Nối hai mệnh đề độc lập cần liên từ kết hợp sau dấu phẩy. Chỉ dùng dấu phẩy là lỗi comma splice.`),
+    Q(`The rent is high; ___, the location is excellent.`, [`however`, `because`, `and`, `so that`], 0, `Sau dấu chấm phẩy dùng however (tuy nhiên) rồi dấu phẩy để nối hai ý đối lập.`),
+    Q(`Liên từ nào trong FANBOYS chỉ nguyên nhân?`, [`for`, `yet`, `or`, `nor`], 0, `For nghĩa là vì, giới thiệu nguyên nhân: He stayed home, for he was ill.`),
+    Q(`Câu nào dùng dấu phẩy sai?`, [`I like coffee, and tea.`, `He stayed home, for he was ill.`, `She loves reading, and he enjoys writing.`, `He is rich, yet he is unhappy.`], 0, `Chỉ nối hai danh từ coffee và tea nên không dùng dấu phẩy: I like coffee and tea.`)
+  ]),
+
+  mk2('u12', `Câu phức và câu ghép phức`, `Liên từ phụ thuộc, quy tắc dấu phẩy và câu ghép phức.`, [
+    L(`Liên từ phụ thuộc`, `because, although, if, when, so that...`, [
+      `Thời gian: when, while, before, after, since, until, as soon as.`,
+      `Nguyên nhân: because, since, as.`,
+      `Nhượng bộ: although, though, even though.`,
+      `Điều kiện: if, unless, provided that.`,
+      `Mục đích: so that, in order that. Kết quả: so ... that, such ... that. Cách thức: as if, as though.`
+    ], [[`If you study hard, you will pass the exam.`, `Nếu học chăm chỉ thì bạn sẽ vượt qua kỳ thi.`], [`He was so tired that he fell asleep.`, `Anh ấy mệt đến mức ngủ thiếp đi.`]]),
+    L(`Dấu phẩy và câu ghép phức`, `Mệnh đề phụ , mệnh đề chính`, [
+      `Mệnh đề phụ thuộc đứng trước thì có dấu phẩy: Because it was raining, we canceled the picnic.`,
+      `Mệnh đề phụ thuộc đứng sau thì không cần dấu phẩy: We canceled the picnic because it was raining.`,
+      `Câu ghép phức có ít nhất hai mệnh đề độc lập và một mệnh đề phụ thuộc: Although I was tired, I finished my work, and I went to bed.`
+    ], [[`Because it was raining, we canceled the picnic.`, `Vì trời mưa nên chúng tôi đã hủy buổi dã ngoại.`], [`We canceled the picnic because it was raining.`, `Chúng tôi hủy buổi dã ngoại vì trời mưa.`]])
+  ], [
+    `Thiếu dấu phẩy khi mệnh đề phụ đứng trước: Because he was tired, he went to bed early.`,
+    `Không thêm dấu phẩy khi mệnh đề phụ đứng sau mệnh đề chính.`,
+    `Một mệnh đề phụ thuộc đứng một mình chỉ là câu thiếu, cần gắn với mệnh đề chính.`
+  ], [
+    Q(`___ it was raining, we canceled the picnic.`, [`Because`, `But`, `So`, `Or`], 0, `Mưa là nguyên nhân hủy buổi dã ngoại nên dùng because. But, so, or là liên từ kết hợp, không mở đầu mệnh đề phụ thuộc.`),
+    Q(`Chọn câu đúng về dấu phẩy.`, [`If you study hard you will pass the exam.`, `If you study hard, you will pass the exam.`, `If you study hard; you will pass the exam.`, `If, you study hard you will pass the exam.`], 1, `Mệnh đề phụ thuộc đứng trước thì cần dấu phẩy: If you study hard, you will pass.`),
+    Q(`Liên từ nào dưới đây chỉ sự nhượng bộ?`, [`because`, `although`, `unless`, `until`], 1, `Although nghĩa là mặc dù, diễn tả nhượng bộ.`),
+    Q(`He was ___ tired that he fell asleep.`, [`so`, `such`, `too`, `very`], 0, `Cấu trúc so + tính từ + that chỉ kết quả: so tired that.`),
+    Q(`Câu nào là câu ghép phức?`, [`Although I was tired, I finished my work, and I went to bed.`, `She reads books because she loves stories.`, `She reads books, and he writes poems.`, `She reads books.`], 0, `Có 2 mệnh đề độc lập và 1 mệnh đề phụ thuộc nên là câu ghép phức.`),
+    Q(`Liên từ phụ thuộc nào chỉ điều kiện?`, [`unless`, `although`, `while`, `until`], 0, `Unless nghĩa là trừ khi (if ... not), diễn tả điều kiện.`)
+  ]),
+
+  mk2('u13', `Dấu câu cơ bản và lỗi thường gặp`, `Dấu chấm, phẩy, chấm phẩy, dấu phẩy Oxford và các lỗi về câu.`, [
+    L(`Dấu câu cơ bản`, `. ? ! , ;`, [
+      `Dấu chấm kết thúc câu trần thuật: She is my teacher.`,
+      `Dấu chấm hỏi kết thúc câu hỏi: Where are you going?`,
+      `Dấu chấm than kết thúc câu cảm thán hoặc mệnh lệnh mạnh: Watch out!`,
+      `Dấu phẩy phân tách các mục trong danh sách hoặc ngăn cách mệnh đề phụ, cụm từ mở đầu: I bought apples, oranges, and bananas. After the movie, we went to dinner.`,
+      `Dấu chấm phẩy nối hai mệnh đề độc lập có liên quan chặt chẽ: The rent is high; the location is excellent.`
+    ], [[`Where are you going?`, `Bạn đang đi đâu vậy?`], [`After the movie, we went to dinner.`, `Sau bộ phim, chúng tôi đi ăn tối.`]]),
+    L(`Dấu phẩy Oxford`, `John, Mary, and Peter`, [
+      `Dấu phẩy Oxford là dấu phẩy đặt trước and trong danh sách từ ba mục trở lên.`,
+      `Có dấu phẩy Oxford: I invited John, Mary, and Peter. Không có: I invited John, Mary and Peter.`,
+      `Cả hai cách đều đúng, điều quan trọng là dùng nhất quán trong cùng một bài viết.`
+    ], [[`I invited John, Mary, and Peter.`, `Tôi đã mời John, Mary và Peter.`]])
+  ], [
+    `Câu quá dài, rườm rà thì nên tách ra hoặc viết lại cho rõ ràng.`,
+    `Không để mệnh đề phụ thuộc đứng một mình: While driving to work. Cần thêm mệnh đề chính.`,
+    `Không thêm dấu phẩy khi chỉ liệt kê hai đối tượng: She enjoys reading and watching movies.`
+  ], [
+    Q(`Chọn câu đúng.`, [`She enjoys reading, and watching movies.`, `She enjoys reading and watching movies.`, `She enjoys, reading and watching movies.`, `She enjoys reading and, watching movies.`], 1, `Chỉ liệt kê hai đối tượng nên không cần dấu phẩy.`),
+    Q(`Dấu nào dùng để nối hai mệnh đề độc lập có liên quan chặt chẽ?`, [`dấu chấm phẩy (;)`, `dấu chấm hỏi (?)`, `dấu chấm than (!)`, `dấu phẩy đơn (,)`], 0, `Dấu chấm phẩy nối hai mệnh đề độc lập liên quan chặt chẽ. Chỉ dùng dấu phẩy đơn sẽ thành lỗi comma splice.`),
+    Q(`Chọn câu đúng.`, [`After the movie; we went to dinner.`, `After the movie, we went to dinner.`, `After, the movie we went to dinner.`, `After the movie we, went to dinner.`], 1, `Cụm từ mở đầu được ngăn cách với mệnh đề chính bằng dấu phẩy.`),
+    Q(`I invited John, Mary, and Peter. Dấu phẩy trước and trong câu này gọi là gì?`, [`Dấu phẩy Oxford`, `Dấu phẩy ngắt câu`, `Comma splice`, `Dấu chấm phẩy`], 0, `Dấu phẩy đặt trước and trong danh sách từ ba mục trở lên gọi là dấu phẩy Oxford.`),
+    Q(`Cách sửa nào làm cho While driving to work thành câu hoàn chỉnh?`, [`While driving to work, she listened to the radio.`, `While driving to work, and.`, `While, driving to work.`, `While driving to work;`], 0, `Mệnh đề phụ thuộc cần gắn với mệnh đề chính: she listened to the radio.`),
+    Q(`Câu nào kết thúc bằng dấu câu dùng cho mệnh lệnh mạnh?`, [`Watch out!`, `She is my teacher.`, `Where are you going?`, `I like coffee and tea.`], 0, `Dấu chấm than dùng cho câu cảm thán hoặc mệnh lệnh mạnh.`)
+  ])
+];
+UNITS.push(...PHAN2);
+
+/* ===================== PHẦN 3: MỆNH ĐỀ ===================== */
+const mk3 = mkIn(`Nội dung theo tài liệu Tổng quát ngữ pháp tiếng Anh (The Forum Center), Phần 3: Mệnh đề.`);
+const PHAN3 = [
+  mk3('u14', `Mệnh đề danh từ`, `Mệnh đề làm chủ ngữ, tân ngữ, bổ ngữ và trật tự từ không đảo.`, [
+    L(`Mệnh đề danh từ làm gì trong câu`, `that/what/whether/who/where... + S + V`, [
+      `Mệnh đề danh từ đóng vai trò như một danh từ: làm chủ ngữ, tân ngữ hoặc bổ ngữ.`,
+      `Từ mở đầu: that, what, whatever, whether/if, who, whoever, whom, which, when, where, why, how.`,
+      `Trật tự từ giống câu trần thuật: từ để hỏi + S + V, không đảo như câu hỏi.`
+    ], [[`What he said surprised everyone.`, `Điều anh ấy nói đã làm mọi người ngạc nhiên.`], [`I don't know where he lives.`, `Tôi không biết anh ấy sống ở đâu.`]]),
+    L(`Ba chức năng`, `chủ ngữ, tân ngữ, bổ ngữ`, [
+      `Chủ ngữ: What she said is important.`,
+      `Tân ngữ: They believe that honesty is the best policy.`,
+      `Bổ ngữ: The problem is that we don't have enough time.`,
+      `Mẹo nhận biết: thử thay mệnh đề bằng it hoặc something. Thay được thì đó là mệnh đề danh từ.`
+    ], [[`They believe that honesty is the best policy.`, `Họ tin rằng trung thực là thượng sách.`], [`The problem is that we don't have enough time.`, `Vấn đề là chúng ta không có đủ thời gian.`]])
+  ], [
+    `Không đảo trật tự như câu hỏi: I don't know what he is doing, không phải what is he doing.`,
+    `Do you know who he is? chứ không phải who is he.`,
+    `Mệnh đề danh từ dạng Yes/No cần whether hoặc if: I wonder whether he will come.`
+  ], [
+    Q(`I don't know what ___ doing.`, [`is he`, `he is`, `does he`, `he be`], 1, `Trong mệnh đề danh từ, trật tự là S + V: what he is doing.`),
+    Q(`Do you know who ___ ?`, [`is he`, `he is`, `does he`, `he does`], 1, `Trong mệnh đề danh từ không đảo: who he is.`),
+    Q(`I wonder ___ he will come or not.`, [`that`, `whether`, `what`, `which`], 1, `Mệnh đề danh từ dạng Yes/No cần whether hoặc if.`),
+    Q(`___ he said surprised everyone.`, [`What`, `Which`, `Who`, `If`], 0, `What mở đầu mệnh đề danh từ làm chủ ngữ, nghĩa là điều mà.`),
+    Q(`The problem is ___ we don't have enough time.`, [`that`, `what`, `whose`, `whom`], 0, `That mở đầu mệnh đề danh từ làm bổ ngữ: The problem is that ...`),
+    Q(`Trong câu They believe that honesty is the best policy, mệnh đề that honesty is the best policy làm chức năng gì?`, [`Chủ ngữ`, `Tân ngữ`, `Bổ ngữ`, `Trạng ngữ`], 1, `Mệnh đề đứng sau động từ believe và là điều được tin, nên làm tân ngữ.`)
+  ]),
+
+  mk3('u15', `Mệnh đề quan hệ: who, whom, whose, which, that`, `Chọn từ quan hệ đúng theo danh từ đứng trước và chức năng trong mệnh đề.`, [
+    L(`Từ quan hệ`, `N + who / whom / whose / which / that`, [
+      `Mệnh đề quan hệ bổ nghĩa cho danh từ hoặc đại từ đứng trước (antecedent) để xác định hoặc mô tả rõ hơn.`,
+      `Who thay cho người, làm chủ ngữ (đôi khi tân ngữ): People who exercise regularly tend to be healthier.`,
+      `Whom thay cho người, làm tân ngữ: The man whom I met was kind.`,
+      `Whose chỉ sự sở hữu: The girl whose bag was stolen called the police.`,
+      `Which thay cho vật: The museum which was renovated is popular.`,
+      `That thay cho người hoặc vật, chỉ dùng trong mệnh đề xác định: The book that you gave me is fascinating.`,
+      `When, where, why là trạng từ quan hệ (thời gian, nơi chốn, lý do): The town where I grew up is small.`
+    ], [[`The book that you gave me is fascinating.`, `Cuốn sách mà bạn đưa tôi thật hấp dẫn.`], [`People who exercise regularly tend to be healthier.`, `Người tập thể dục thường xuyên thường khỏe mạnh hơn.`]]),
+    L(`Lược bỏ từ quan hệ`, `bỏ được khi làm tân ngữ`, [
+      `Chỉ được lược bỏ đại từ quan hệ khi nó làm tân ngữ trong mệnh đề xác định: The book (that) I bought yesterday is interesting.`,
+      `Khi đại từ quan hệ làm chủ ngữ thì không được bỏ: The man who lives next door is a doctor.`
+    ], [[`The book (that) I bought yesterday is interesting.`, `Cuốn sách tôi mua hôm qua rất thú vị.`], [`The man who lives next door is a doctor.`, `Người đàn ông sống bên cạnh là bác sĩ.`]])
+  ], [
+    `Who dùng cho người, which dùng cho vật: The man who lives next door, không phải The man which lives next door.`,
+    `Không bỏ đại từ quan hệ khi nó làm chủ ngữ: không viết The man lives next door is a doctor.`,
+    `Trạng từ quan hệ chỉ lý do là why: The reason why she failed is unknown, không phải The reason because she failed.`
+  ], [
+    Q(`The woman ___ lives next door is a lawyer.`, [`who`, `which`, `whose`, `whom`], 0, `The woman là người, và từ quan hệ làm chủ ngữ của lives nên dùng who.`),
+    Q(`They visited the museum ___ was recently renovated.`, [`who`, `which`, `whom`, `whose`], 1, `The museum là vật nên dùng which.`),
+    Q(`The girl ___ bag was stolen called the police.`, [`who`, `which`, `whose`, `that`], 2, `Whose chỉ sự sở hữu: cái túi của cô gái.`),
+    Q(`The town ___ I grew up is small.`, [`which`, `who`, `where`, `whose`], 2, `Where là trạng từ quan hệ chỉ nơi chốn.`),
+    Q(`Chọn câu đúng.`, [`The man lives next door is a doctor.`, `The man who lives next door is a doctor.`, `The man which lives next door is a doctor.`, `The man whom lives next door is a doctor.`], 1, `Đại từ quan hệ làm chủ ngữ không được bỏ, và dùng who cho người.`),
+    Q(`The reason ___ she failed is unknown.`, [`because`, `why`, `where`, `whose`], 1, `Trạng từ quan hệ chỉ lý do là why.`)
+  ]),
+
+  mk3('u16', `Mệnh đề xác định và không xác định`, `Phân biệt hai loại mệnh đề quan hệ và vai trò của dấu phẩy.`, [
+    L(`So sánh hai loại mệnh đề`, `xác định: không có dấu phẩy. Không xác định: có dấu phẩy`, [
+      `Mệnh đề xác định cung cấp thông tin cần thiết để biết nói về ai hoặc cái gì, không dùng dấu phẩy: The book that is on the table is mine.`,
+      `Mệnh đề không xác định là thông tin thêm, bỏ đi câu vẫn rõ nghĩa, đặt giữa hai dấu phẩy: My mother, who is a teacher, loves reading.`,
+      `That dùng được trong mệnh đề xác định, không dùng trong mệnh đề không xác định.`,
+      `Được lược bỏ từ quan hệ khi nó làm tân ngữ trong mệnh đề xác định. Không được lược bỏ trong mệnh đề không xác định.`
+    ], [[`The book that is on the table is mine.`, `Cuốn sách ở trên bàn là của tôi.`], [`My mother, who is a teacher, loves reading.`, `Mẹ tôi, một giáo viên, thích đọc sách.`]]),
+    L(`Dấu phẩy làm đổi nghĩa`, `My brother who... và My brother, who...`, [
+      `My brother who lives in Hanoi is a doctor: mệnh đề xác định, người nói có nhiều anh em trai, người sống ở Hà Nội là bác sĩ.`,
+      `My brother, who lives in Hanoi, is a doctor: mệnh đề không xác định, người nói chỉ có một anh em trai, việc sống ở Hà Nội chỉ là thông tin thêm.`
+    ], [[`My brother who lives in Hanoi is a doctor.`, `Người anh/em sống ở Hà Nội của tôi là bác sĩ (tôi có nhiều anh em).`], [`My brother, who lives in Hanoi, is a doctor.`, `Anh/em trai tôi, hiện sống ở Hà Nội, là bác sĩ (tôi chỉ có một).`]])
+  ], [
+    `Không dùng that trong mệnh đề không xác định. Sai: My brother, that lives in London, is a teacher. Đúng: who.`,
+    `Mệnh đề không xác định chỉ dùng who, whom, whose, which.`,
+    `Dấu phẩy làm thay đổi nghĩa của câu nên cần cân nhắc kỹ.`
+  ], [
+    Q(`Chọn câu đúng.`, [`My brother, that lives in London, is a teacher.`, `My brother, who lives in London, is a teacher.`, `My brother who lives in London, is a teacher.`, `My brother, who lives in London is a teacher.`], 1, `Mệnh đề không xác định đặt giữa hai dấu phẩy và không dùng that.`),
+    Q(`My mother, who is a teacher, loves reading. Mệnh đề who is a teacher thuộc loại nào?`, [`Xác định`, `Không xác định`, `Mệnh đề danh từ`, `Mệnh đề trạng ngữ`], 1, `Nó là thông tin thêm, đặt giữa hai dấu phẩy nên là mệnh đề không xác định.`),
+    Q(`My brother who lives in Hanoi is a doctor. Câu này gợi ý điều gì?`, [`Người nói chỉ có một anh em trai.`, `Người nói có nhiều anh em trai.`, `Người nói không có anh em trai.`, `Anh ấy không sống ở Hà Nội.`], 1, `Mệnh đề xác định giúp phân biệt người sống ở Hà Nội với các anh em khác.`),
+    Q(`Trong mệnh đề không xác định, từ nào KHÔNG được dùng?`, [`who`, `which`, `whose`, `that`], 3, `Mệnh đề không xác định chỉ dùng who, whom, whose, which.`),
+    Q(`The book ___ is on the table is mine.`, [`that`, `who`, `whose`, `whom`], 0, `Book là vật, mệnh đề xác định nên dùng that hoặc which.`),
+    Q(`Trong câu The man who lives next door is a doctor, vì sao không thể bỏ who?`, [`Vì who làm chủ ngữ`, `Vì who làm tân ngữ`, `Vì who là liên từ phụ thuộc`, `Vì câu không có dấu phẩy`], 0, `Chỉ được bỏ đại từ quan hệ khi nó làm tân ngữ. Ở đây who là chủ ngữ của lives.`)
+  ]),
+
+  mk3('u17', `Mệnh đề trạng ngữ`, `Bảy loại mệnh đề trạng ngữ và các lưu ý về dấu phẩy, thì hiện tại, unless.`, [
+    L(`Các loại mệnh đề trạng ngữ`, `thời gian, nguyên nhân, điều kiện, mục đích...`, [
+      `Thời gian: when, while, before, after, since, until, as soon as. I will call you when I arrive.`,
+      `Nguyên nhân: because, since, as. She stayed at home because she was sick.`,
+      `Điều kiện: if, unless, provided that. If it rains, we will stay inside.`,
+      `Mục đích: so that, in order that. She practices every day so that she can improve her skills.`,
+      `Kết quả: so ... that, such ... that. He was so tired that he fell asleep.`,
+      `Nhượng bộ: although, though, even though. Although it was raining, they went out.`,
+      `Cách thức: as if, as though. He talked as if he knew everything.`
+    ], [[`I will call you when I arrive.`, `Tôi sẽ gọi bạn khi tôi đến.`], [`Although it was raining, they went out.`, `Dù trời mưa, họ vẫn ra ngoài.`]]),
+    L(`Lưu ý quan trọng`, `thời gian và điều kiện: dùng hiện tại, không dùng will`, [
+      `Đặt dấu phẩy khi mệnh đề trạng ngữ đứng đầu câu, không cần khi đứng sau.`,
+      `Trong mệnh đề thời gian và điều kiện, dùng thì hiện tại để nói về tương lai: I will call you when I arrive.`,
+      `Unless = if ... not: I will go out unless it rains = I will go out if it doesn't rain.`
+    ], [[`I will go out unless it rains.`, `Tôi sẽ ra ngoài trừ khi trời mưa.`]])
+  ], [
+    `Không dùng will trong mệnh đề thời gian: I will call you when I arrive.`,
+    `Không dùng unless kèm not (phủ định kép). Sai: unless it doesn't rain.`,
+    `Thiếu dấu phẩy khi mệnh đề phụ đứng trước: Because he was tired, he went to bed early.`
+  ], [
+    Q(`I will call you when I ___ .`, [`will arrive`, `arrive`, `arrived`, `am arriving`], 1, `Trong mệnh đề thời gian dùng hiện tại để nói về tương lai: when I arrive.`),
+    Q(`Chọn câu đúng.`, [`I will go out unless it doesn't rain.`, `I will go out unless it rains.`, `I will go out if unless it rains.`, `I will go out unless will it rain.`], 1, `Unless đã mang nghĩa phủ định (if ... not) nên không thêm not.`),
+    Q(`She practices every day ___ she can improve her skills.`, [`so that`, `although`, `unless`, `as if`], 0, `So that chỉ mục đích.`),
+    Q(`___ it was raining, they went out.`, [`Because`, `Although`, `So that`, `Unless`], 1, `Trời mưa nhưng vẫn đi ra ngoài là nhượng bộ nên dùng although.`),
+    Q(`He talked ___ he knew everything.`, [`as if`, `so that`, `unless`, `until`], 0, `As if chỉ cách thức, nghĩa là như thể.`),
+    Q(`Chọn câu đúng.`, [`Because he was tired he went to bed early.`, `Because he was tired, he went to bed early.`, `Because, he was tired he went to bed early.`, `Because he was tired; he went to bed early.`], 1, `Mệnh đề trạng ngữ đứng đầu câu thì cần dấu phẩy.`)
+  ])
+];
+UNITS.push(...PHAN3);
+
+/* ===================== PHẦN 4: THÌ ĐỘNG TỪ (các bài bổ sung) ===================== */
+const mk4 = mkIn(`Nội dung theo tài liệu Tổng quát ngữ pháp tiếng Anh (The Forum Center), Phần 4: Thì động từ.`);
+const PHAN4 = [
+  mk4('u18', `Hiện tại hoàn thành tiếp diễn`, `Nhấn mạnh quá trình kéo dài đến hiện tại và so sánh với hiện tại hoàn thành.`, [
+    L(`Hiện tại hoàn thành tiếp diễn`, `S + have/has + been + V-ing`, [
+      `Dùng cho hành động bắt đầu trong quá khứ và vẫn tiếp tục ở hiện tại, nhấn mạnh quá trình.`,
+      `Thường đi với for (khoảng thời gian) và since (mốc thời gian).`,
+      `He/she/it dùng has been. I/you/we/they dùng have been.`
+    ], [[`They have been working here since morning.`, `Họ làm việc ở đây từ sáng đến giờ.`], [`She has been learning English for two years.`, `Cô ấy học tiếng Anh được hai năm rồi.`]]),
+    L(`Hiện tại hoàn thành hay hoàn thành tiếp diễn`, `khoảng thời gian/kết quả hay quá trình liên tục`, [
+      `I have lived here for five years nhấn mạnh khoảng thời gian hoặc kết quả.`,
+      `I have been living here for five years nhấn mạnh quá trình liên tục, còn tiếp diễn.`,
+      `Cả hai câu đều đúng ngữ pháp, chọn thì theo ý muốn nhấn mạnh.`,
+      `Động từ chỉ trạng thái (know, like, love, need...) không dùng ở thể tiếp diễn.`
+    ], [[`I have lived here for five years.`, `Tôi đã sống ở đây năm năm.`], [`I have been living here for five years.`, `Tôi đã và đang sống ở đây suốt năm năm.`]])
+  ], [
+    `Phải có been + V-ing: They have been working, không phải They have working.`,
+    `He/she/it dùng has been: She has been learning.`,
+    `Động từ chỉ trạng thái không dùng tiếp diễn: I have known him for years, không phải I have been knowing him.`
+  ], [
+    Q(`They ___ here since morning.`, [`have been working`, `are working`, `worked`, `had worked`], 0, `Since morning cho thấy việc làm bắt đầu từ sáng và còn kéo dài, nên dùng hiện tại hoàn thành tiếp diễn.`),
+    Q(`She ___ English for two years.`, [`has been learning`, `is learning`, `learned`, `will learn`], 0, `For two years và việc học còn tiếp tục nên dùng has been learning.`),
+    Q(`Chọn câu đúng.`, [`She has been work here.`, `She has been working here.`, `She have been working here.`, `She has working here.`], 1, `Cấu trúc: have/has + been + V-ing, và she đi với has.`),
+    Q(`I have been living here for five years nhấn mạnh điều gì?`, [`Quá trình liên tục còn tiếp diễn`, `Hành động đã kết thúc`, `Hành động trong tương lai`, `Một thói quen đã bỏ`], 0, `Thể hoàn thành tiếp diễn nhấn mạnh quá trình kéo dài liên tục đến hiện tại.`),
+    Q(`Chọn câu đúng.`, [`I have been knowing him for years.`, `I have known him for years.`, `I am knowing him for years.`, `I know him since years.`], 1, `Know là động từ chỉ trạng thái nên không dùng thể tiếp diễn.`),
+    Q(`He ___ for three hours.`, [`have been studying`, `has been studying`, `has be studying`, `have studying`], 1, `He đi với has, và cấu trúc là has been + V-ing.`)
+  ]),
+
+  mk4('u19', `Quá khứ hoàn thành và quá khứ hoàn thành tiếp diễn`, `Hành động xảy ra trước một hành động khác hoặc một mốc trong quá khứ.`, [
+    L(`Quá khứ hoàn thành`, `S + had + V3/V-ed`, [
+      `Dùng cho hành động xảy ra trước một hành động khác trong quá khứ.`,
+      `Dấu hiệu: before, after, by the time (+ quá khứ), already.`,
+      `Hành động xảy ra sau chia quá khứ đơn: When we arrived, they had left.`
+    ], [[`When we arrived, they had left.`, `Khi chúng tôi đến, họ đã đi rồi.`], [`When we arrived at the cinema, the film had already started.`, `Khi chúng tôi đến rạp, phim đã bắt đầu rồi.`]]),
+    L(`Quá khứ hoàn thành tiếp diễn`, `S + had been + V-ing`, [
+      `Dùng cho hành động diễn ra liên tục trước một thời điểm trong quá khứ, nhấn mạnh quá trình.`
+    ], [[`They had been waiting for hours before the train arrived.`, `Họ đã đợi hàng giờ trước khi tàu đến.`]])
+  ], [
+    `Hành động xảy ra trước thì dùng had + V3: the film had already started, không phải the film already started.`,
+    `Chỉ có một hành động trong quá khứ, không có mốc để so sánh thì dùng quá khứ đơn: She went to the store yesterday, không phải She had gone.`,
+    `Hành động xảy ra sau chia quá khứ đơn, hành động xảy ra trước chia quá khứ hoàn thành.`
+  ], [
+    Q(`When we arrived at the cinema, the film ___ already started.`, [`has`, `had`, `was`, `is`], 1, `Phim bắt đầu trước khi chúng tôi đến nên dùng quá khứ hoàn thành: had already started.`),
+    Q(`Họ rời đi trước khi chúng tôi đến. Chọn câu đúng.`, [`When we arrived, they had left.`, `When we arrived, they have left.`, `When we had arrived, they left.`, `When we arrived, they leave.`], 0, `Việc rời đi xảy ra trước nên dùng had left, việc đến chia quá khứ đơn.`),
+    Q(`They ___ for hours before the train arrived.`, [`had been waiting`, `have been waiting`, `were wait`, `are waiting`], 0, `Việc đợi kéo dài liên tục trước một mốc quá khứ nên dùng quá khứ hoàn thành tiếp diễn.`),
+    Q(`Chọn câu đúng.`, [`She had gone to the store yesterday.`, `She went to the store yesterday.`, `She has gone to the store yesterday.`, `She goes to the store yesterday.`], 1, `Chỉ có một hành động quá khứ với mốc yesterday nên dùng quá khứ đơn.`),
+    Q(`By the time we got there, the movie ___ .`, [`had started`, `has started`, `starts`, `was start`], 0, `By the time + quá khứ đơn thì vế còn lại dùng quá khứ hoàn thành.`),
+    Q(`Thì nào dùng cho hành động xảy ra trước một hành động khác trong quá khứ?`, [`Quá khứ hoàn thành`, `Hiện tại hoàn thành`, `Quá khứ đơn`, `Tương lai đơn`], 0, `Quá khứ hoàn thành (had + V3) diễn tả hành động xảy ra trước một hành động hoặc mốc trong quá khứ.`)
+  ]),
+
+  mk4('u20', `Tương lai đơn và be going to`, `Chọn will, be going to hay hiện tại tiếp diễn khi nói về tương lai.`, [
+    L(`Will`, `S + will + V`, [
+      `Dùng cho dự đoán và quyết định tại thời điểm nói: She will travel to Japan next month. I will go and get some coffee.`,
+      `Dự đoán không có căn cứ rõ ràng cũng dùng will: I think I will be late.`
+    ], [[`She will travel to Japan next month.`, `Cô ấy sẽ đi Nhật Bản vào tháng tới.`], [`I will go and get some coffee.`, `Tôi sẽ đi lấy ít cà phê.`]]),
+    L(`Be going to và kế hoạch đã sắp xếp`, `S + am/is/are + going to + V`, [
+      `Be going to dùng cho dự định đã có từ trước, hoặc dự đoán có căn cứ: Look at those clouds! It is going to rain.`,
+      `Kế hoạch đã sắp xếp có thể dùng hiện tại tiếp diễn: They are meeting us at 9 AM tomorrow.`,
+      `Không dùng hiện tại đơn cho kế hoạch tương lai đã sắp xếp. Sai: I go to the dentist tomorrow. Đúng: I am going to the dentist tomorrow.`
+    ], [[`Look at those clouds! It is going to rain.`, `Nhìn những đám mây kìa! Trời sắp mưa.`], [`They are meeting us at 9 AM tomorrow.`, `Họ sẽ gặp chúng ta lúc 9 giờ sáng mai.`]])
+  ], [
+    `Quyết định ngay lúc nói dùng will, không dùng hiện tại đơn: I will go and get some coffee, không phải I go get some coffee.`,
+    `Không bỏ be trong be going to: They are going to travel next month.`,
+    `Dự đoán có dấu hiệu rõ ràng dùng be going to, dự đoán không có căn cứ dùng will.`
+  ], [
+    Q(`Look at those clouds! It ___ rain.`, [`will`, `is going to`, `goes to`, `going to`], 1, `Có dấu hiệu rõ ràng (đám mây) nên dùng be going to.`),
+    Q(`Chọn câu đúng.`, [`They going to travel next month.`, `They are going to travel next month.`, `They is going to travel next month.`, `They are go to travel next month.`], 1, `Không được thiếu be: They are going to travel.`),
+    Q(`It's cold. I ___ close the window. (quyết định ngay lúc nói)`, [`will`, `am going`, `close`, `closed`], 0, `Quyết định tại thời điểm nói dùng will.`),
+    Q(`Họ đã sắp xếp gặp chúng ta lúc 9 giờ sáng mai. Chọn câu đúng.`, [`They are meeting us at 9 AM tomorrow.`, `They will meeting us at 9 AM tomorrow.`, `They meeting us at 9 AM tomorrow.`, `They met us at 9 AM tomorrow.`], 0, `Kế hoạch đã sắp xếp dùng hiện tại tiếp diễn.`),
+    Q(`I think I ___ late.`, [`will be`, `am being`, `was`, `have been`], 0, `Dự đoán không có dấu hiệu rõ ràng dùng will.`),
+    Q(`I ___ to the dentist tomorrow. (kế hoạch đã sắp xếp)`, [`go`, `am going`, `went`, `have gone`], 1, `Kế hoạch đã sắp xếp dùng am going, không dùng hiện tại đơn.`)
+  ]),
+
+  mk4('u21', `Tương lai tiếp diễn và tương lai hoàn thành`, `Ba thì tương lai nâng cao: tiếp diễn, hoàn thành, hoàn thành tiếp diễn.`, [
+    L(`Tương lai tiếp diễn`, `S + will be + V-ing`, [
+      `Dùng cho hành động sẽ đang diễn ra tại một thời điểm trong tương lai.`
+    ], [[`This time next week, I will be lying on the beach.`, `Giờ này tuần sau, tôi sẽ đang nằm trên bãi biển.`]]),
+    L(`Tương lai hoàn thành`, `S + will have + V3/V-ed`, [
+      `Dùng cho hành động sẽ hoàn thành trước một thời điểm trong tương lai.`,
+      `Thường đi với by + mốc tương lai, hoặc by the time + hiện tại đơn.`
+    ], [[`By 2030, she will have graduated from university.`, `Đến năm 2030, cô ấy sẽ đã tốt nghiệp đại học.`], [`By the time we get there, the movie will have started.`, `Lúc chúng ta đến nơi, phim sẽ đã bắt đầu.`]]),
+    L(`Tương lai hoàn thành tiếp diễn`, `S + will have been + V-ing`, [
+      `Dùng cho hành động sẽ kéo dài liên tục đến một thời điểm trong tương lai.`
+    ], [[`By next year, they will have been working here for a decade.`, `Đến năm sau, họ sẽ đã làm việc ở đây được một thập kỷ.`]])
+  ], [
+    `Có by + mốc tương lai (by 2030, by next year) thì nghĩ đến tương lai hoàn thành.`,
+    `Tương lai tiếp diễn cần be: I will be lying, không phải I will lying.`,
+    `Sau will have dùng V3, không dùng nguyên mẫu: will have graduated.`
+  ], [
+    Q(`This time next week, I ___ on the beach.`, [`will be lying`, `lie`, `have lain`, `am lie`], 0, `Hành động sẽ đang diễn ra tại một thời điểm trong tương lai nên dùng tương lai tiếp diễn.`),
+    Q(`By 2030, she ___ from university.`, [`will have graduated`, `graduated`, `graduates`, `is graduated`], 0, `By + mốc tương lai nên dùng tương lai hoàn thành.`),
+    Q(`By next year, they ___ here for a decade.`, [`will have been working`, `will work`, `have been working`, `worked`], 0, `Việc làm kéo dài liên tục đến một mốc tương lai nên dùng tương lai hoàn thành tiếp diễn.`),
+    Q(`By the time we get there, the movie ___ .`, [`will have started`, `started`, `is starting`, `has started`], 0, `By the time + hiện tại đơn thì vế chính dùng tương lai hoàn thành.`),
+    Q(`Chọn câu đúng.`, [`I will lying on the beach.`, `I will be lying on the beach.`, `I will have lying on the beach.`, `I will been lying on the beach.`], 1, `Tương lai tiếp diễn: will be + V-ing.`),
+    Q(`Thì nào nhấn mạnh hành động kéo dài liên tục đến một mốc tương lai?`, [`Tương lai hoàn thành tiếp diễn`, `Tương lai đơn`, `Tương lai tiếp diễn`, `Hiện tại hoàn thành`], 0, `Will have been + V-ing nhấn mạnh quá trình kéo dài đến một mốc tương lai.`)
+  ]),
+
+  mk4('u22', `Dấu hiệu nhận biết và cách chọn thì`, `Bảng dấu hiệu, bốn thể của động từ và quy trình chọn thì đúng.`, [
+    L(`Bốn thể của động từ`, `đơn, tiếp diễn, hoàn thành, hoàn thành tiếp diễn`, [
+      `Có 12 thì cơ bản, chia theo 3 thời (hiện tại, quá khứ, tương lai), mỗi thời có 4 thể.`,
+      `Đơn: sự thật, thói quen, hành động trọn vẹn. Dạng V, V2, will V.`,
+      `Tiếp diễn: hành động đang diễn ra tại một thời điểm. Dạng be + V-ing.`,
+      `Hoàn thành: hành động hoàn tất trước một mốc. Dạng have/had/will have + V3.`,
+      `Hoàn thành tiếp diễn: hành động kéo dài liên tục đến một mốc, nhấn mạnh quá trình. Dạng have/had/will have + been + V-ing.`
+    ], [[`She works every day.`, `Cô ấy làm việc mỗi ngày.`], [`They have been working here since morning.`, `Họ làm việc ở đây từ sáng đến giờ.`]]),
+    L(`Dấu hiệu nhận biết thường gặp`, `tìm từ chỉ thời gian trong câu`, [
+      `Hiện tại đơn: always, usually, often, sometimes, every day, on Mondays.`,
+      `Hiện tại tiếp diễn: now, right now, at the moment, Look!, Listen!`,
+      `Hiện tại hoàn thành: already, yet, just, ever, never, since, for, so far, recently.`,
+      `Quá khứ đơn: yesterday, last week/year, ... ago, in 2010.`,
+      `Quá khứ hoàn thành: before, after, by the time (+ quá khứ), already.`,
+      `Tương lai: tomorrow, next week, soon, in the future, by + mốc tương lai.`
+    ], [[`I have just finished my work.`, `Tôi vừa mới làm xong việc.`], [`We visited him two days ago.`, `Chúng tôi đã thăm anh ấy hai ngày trước.`]]),
+    L(`Quy trình chọn thì`, `thời gian, chủ ngữ, động từ, cấu trúc`, [
+      `Bước 1: tìm từ chỉ thời gian (yesterday, now, since, by...) và xác định quá khứ, hiện tại hay tương lai.`,
+      `Bước 2: xác định chủ ngữ ngôi nào, số ít hay số nhiều.`,
+      `Bước 3: chia động từ đúng thì và đúng dạng, tra bảng động từ bất quy tắc.`,
+      `Bước 4: kiểm tra có cần trợ động từ do/does/did hoặc to be không.`
+    ], [[`He likes coffee.`, `Anh ấy thích cà phê.`], [`They are playing soccer.`, `Họ đang chơi bóng đá.`]])
+  ], [
+    `Quên s/es ở ngôi thứ ba số ít: He likes coffee, không phải He like coffee.`,
+    `Thiếu to be trong thì tiếp diễn: They are playing soccer, không phải They playing soccer.`,
+    `Thấy mốc quá khứ xác định (yesterday, last year, ago) thì dùng quá khứ đơn.`
+  ], [
+    Q(`Dấu hiệu yesterday hoặc ... ago thường đi với thì nào?`, [`Quá khứ đơn`, `Hiện tại hoàn thành`, `Tương lai đơn`, `Hiện tại tiếp diễn`], 0, `Mốc quá khứ xác định đi với quá khứ đơn.`),
+    Q(`Dấu hiệu already, yet, just, ever, never thường đi với thì nào?`, [`Hiện tại hoàn thành`, `Quá khứ đơn`, `Tương lai đơn`, `Hiện tại đơn`], 0, `Đây là các dấu hiệu của hiện tại hoàn thành.`),
+    Q(`Thấy Look! hoặc at the moment, ta dùng thì nào?`, [`Hiện tại tiếp diễn`, `Hiện tại đơn`, `Quá khứ đơn`, `Tương lai hoàn thành`], 0, `Đây là dấu hiệu của việc đang diễn ra: hiện tại tiếp diễn.`),
+    Q(`Có tổng cộng bao nhiêu thì cơ bản trong tiếng Anh?`, [`8`, `10`, `12`, `16`], 2, `3 thời (hiện tại, quá khứ, tương lai) nhân 4 thể (đơn, tiếp diễn, hoàn thành, hoàn thành tiếp diễn) là 12 thì.`),
+    Q(`Dạng động từ của hiện tại hoàn thành tiếp diễn là gì?`, [`have/has + been + V-ing`, `have/has + V3`, `am/is/are + V-ing`, `will have been + V-ing`], 0, `Hiện tại hoàn thành tiếp diễn: have/has + been + V-ing.`),
+    Q(`They ___ soccer now.`, [`are playing`, `playing`, `play`, `is play`], 0, `Now cho thấy việc đang diễn ra nên dùng am/is/are + V-ing, và they đi với are.`)
+  ])
+];
+UNITS.push(...PHAN4);
+
+/* ===================== PHẦN 5: HÒA HỢP CHỦ NGỮ VÀ ĐỘNG TỪ ===================== */
+const mk5 = mkIn(`Nội dung theo tài liệu Tổng quát ngữ pháp tiếng Anh (The Forum Center), Phần 5: Hòa hợp chủ ngữ và động từ.`);
+const PHAN5 = [
+  mk5('u23', `Chủ ngữ số ít, số nhiều và nối bằng and`, `Quy tắc cơ bản chia động từ theo chủ ngữ và ngoại lệ của and.`, [
+    L(`Số ít và số nhiều`, `số ít: V(s/es), số nhiều: V nguyên mẫu`, [
+      `Hòa hợp chủ ngữ và động từ: động từ phải phù hợp về số và ngôi với chủ ngữ.`,
+      `Danh từ số ít, he/she/it: động từ thêm s/es ở hiện tại đơn. She enjoys reading books.`,
+      `Danh từ số nhiều, we/they: động từ ở dạng nguyên mẫu. The students study hard.`
+    ], [[`He runs every morning.`, `Anh ấy chạy mỗi sáng.`], [`They run every morning.`, `Họ chạy mỗi sáng.`]]),
+    L(`Chủ ngữ nối bằng and`, `A and B thì động từ số nhiều`, [
+      `Hai chủ ngữ nối bằng and thì động từ số nhiều: Tom and Jerry are friends.`,
+      `Ngoại lệ: hai danh từ chỉ một người, một vật hoặc một khái niệm duy nhất thì động từ số ít: Bread and butter is my favorite breakfast.`
+    ], [[`Tom and Jerry are friends.`, `Tom và Jerry là bạn.`], [`Bread and butter is my favorite breakfast.`, `Bánh mì bơ là bữa sáng yêu thích của tôi.`]])
+  ], [
+    `Quên s/es ở ngôi thứ ba số ít: He walks, không phải He walk.`,
+    `Thêm s vào động từ số nhiều: The children play, không phải The children plays.`,
+    `My sister and I are going, không phải is going.`
+  ], [
+    Q(`He ___ to school every day.`, [`walk`, `walks`, `walking`, `are walking`], 1, `He là ngôi thứ ba số ít nên động từ thêm s: walks.`),
+    Q(`The children ___ in the park.`, [`plays`, `play`, `is play`, `playing`], 1, `Children là danh từ số nhiều nên động từ để nguyên mẫu: play.`),
+    Q(`My sister and I ___ going to the market.`, [`is`, `are`, `am`, `be`], 1, `Hai chủ ngữ nối bằng and là số nhiều nên dùng are.`),
+    Q(`Bread and butter ___ my favorite breakfast.`, [`are`, `is`, `were`, `be`], 1, `Bread and butter là một món duy nhất nên động từ số ít.`),
+    Q(`The teacher and the students ___ in the event.`, [`participate`, `participates`, `is participating`, `has participated`], 0, `Hai chủ ngữ nối bằng and là số nhiều nên động từ không thêm s.`),
+    Q(`Chọn câu đúng.`, [`Tom and Jerry is friends.`, `Tom and Jerry are friends.`, `Tom and Jerry be friends.`, `Tom and Jerry am friends.`], 1, `Tom and Jerry là số nhiều nên dùng are.`)
+  ]),
+
+  mk5('u24', `Đại từ bất định và danh từ không đếm được`, `Each, everyone, nobody và các danh từ không đếm được đều đi với động từ số ít.`, [
+    L(`Đại từ bất định`, `each, everyone, nobody... đi với động từ số ít`, [
+      `each, every, everyone, everybody, someone, somebody, nobody, no one, anyone, either, neither (đứng một mình) dùng động từ số ít.`,
+      `Everyone is here. Somebody has left their umbrella.`,
+      `Each of the students has a laptop: chủ ngữ thật là Each, không phải students.`
+    ], [[`Everyone is here.`, `Mọi người đều có mặt.`], [`Each of the students has a laptop.`, `Mỗi học sinh đều có một máy tính xách tay.`]]),
+    L(`Danh từ không đếm được`, `luôn đi với động từ số ít`, [
+      `Danh từ không đếm được luôn số ít: Information is essential. Water is essential for life.`,
+      `Hay gặp: information, advice, equipment, furniture, research, news, knowledge, evidence.`,
+      `The equipment is outdated, không phải The equipment are outdated.`
+    ], [[`Information is essential.`, `Thông tin là điều thiết yếu.`], [`The equipment is outdated.`, `Thiết bị đã lỗi thời.`]])
+  ], [
+    `Each of the students has, không phải have.`,
+    `A lot of information is available online, không phải are.`,
+    `News, equipment, evidence luôn đi với động từ số ít.`
+  ], [
+    Q(`Everyone ___ here.`, [`are`, `is`, `were`, `be`], 1, `Everyone là đại từ bất định, đi với động từ số ít.`),
+    Q(`Each of the students ___ a laptop.`, [`have`, `has`, `are having`, `were`], 1, `Chủ ngữ thật là Each (số ít) nên dùng has.`),
+    Q(`The equipment ___ outdated.`, [`are`, `is`, `were`, `be`], 1, `Equipment là danh từ không đếm được nên động từ số ít.`),
+    Q(`A lot of information ___ available online.`, [`are`, `is`, `were`, `have`], 1, `Information không đếm được nên động từ số ít.`),
+    Q(`Somebody ___ left their umbrella.`, [`have`, `has`, `are`, `were`], 1, `Somebody là đại từ bất định số ít nên dùng has.`),
+    Q(`Chủ ngữ thật của câu Each of the students has a laptop là gì?`, [`Each`, `students`, `laptop`, `has`], 0, `Each là chủ ngữ. Of the students chỉ là cụm bổ nghĩa.`)
+  ]),
+
+  mk5('u25', `Cụm chen ngang, There/Here và danh từ tập hợp`, `Tìm chủ ngữ chính, chia động từ sau There/Here và với team, staff, police.`, [
+    L(`Cụm từ chen ngang`, `chia theo chủ ngữ chính, bỏ qua of..., with...`, [
+      `Động từ hòa hợp với chủ ngữ chính, không bị ảnh hưởng bởi danh từ trong cụm chen ngang: of..., with..., along with..., as well as..., together with...`,
+      `The bouquet of roses smells wonderful. The coach, along with his assistants, is planning the strategy.`,
+      `Mẹo: bỏ cụm chen ngang để tìm chủ ngữ chính. The basket of fruits is on the table: chủ ngữ là The basket.`
+    ], [[`The bouquet of roses smells wonderful.`, `Bó hoa hồng thơm tuyệt.`], [`The coach, along with his assistants, is planning the strategy.`, `Huấn luyện viên cùng các trợ lý đang lên chiến thuật.`]]),
+    L(`There/Here và danh từ tập hợp`, `There + be + N: chia theo N`, [
+      `Sau There/Here, động từ hòa hợp với danh từ theo sau: There is a problem. There are many challenges.`,
+      `team, family, group, staff, audience, committee xem như một đơn vị thì số ít: The team is winning.`,
+      `Nhấn mạnh từng thành viên thì số nhiều: The team are arguing among themselves. The staff are preparing their reports.`,
+      `Police luôn đi với động từ số nhiều: The police are investigating the case.`
+    ], [[`There are many challenges.`, `Có nhiều thách thức.`], [`The police are investigating the case.`, `Cảnh sát đang điều tra vụ việc.`]])
+  ], [
+    `The quality of the products is improving, không phải are, vì chủ ngữ là quality.`,
+    `There are many options, không phải There is many options.`,
+    `Police luôn số nhiều. Với staff, team, family, cần nhất quán giữa động từ và đại từ đi sau (their, themselves).`
+  ], [
+    Q(`The quality of the products ___ improving.`, [`are`, `is`, `were`, `have been`], 1, `Chủ ngữ chính là The quality (số ít), of the products chỉ là cụm chen ngang.`),
+    Q(`There ___ many challenges.`, [`is`, `are`, `was`, `has`], 1, `Động từ hòa hợp với danh từ theo sau: many challenges (số nhiều).`),
+    Q(`Here ___ the reports you requested.`, [`is`, `are`, `was`, `has`], 1, `The reports là số nhiều nên dùng are.`),
+    Q(`The coach, along with his assistants, ___ planning the strategy.`, [`are`, `is`, `were`, `have been`], 1, `Chủ ngữ chính là The coach (số ít). Along with his assistants là cụm chen ngang.`),
+    Q(`The police ___ investigating the case.`, [`is`, `are`, `was`, `has been`], 1, `Police luôn đi với động từ số nhiều.`),
+    Q(`The team ___ winning. (cả đội như một tập thể)`, [`are`, `is`, `were`, `have`], 1, `Xem cả đội như một đơn vị thì dùng động từ số ít.`)
+  ]),
+
+  mk5('u26', `Phân số, tiêu đề, either/neither, the number of và lượng`, `Các trường hợp đặc biệt hay gặp nhất, kể cả trong bài mô tả số liệu.`, [
+    L(`Phân số, phần trăm`, `chia theo danh từ sau of`, [
+      `Động từ hòa hợp với danh từ theo sau of: Fifty percent of the work is completed.`,
+      `Two-thirds of the students are present. One-third of the apples are rotten.`
+    ], [[`Fifty percent of the work is completed.`, `Năm mươi phần trăm công việc đã hoàn thành.`], [`Two-thirds of the students are present.`, `Hai phần ba số học sinh có mặt.`]]),
+    L(`Tiêu đề, tên riêng và môn học`, `Mathematics, news, The United States: số ít`, [
+      `Tiêu đề sách, phim, tên quốc gia, tổ chức dù có dạng số nhiều vẫn đi với động từ số ít: The United States is a powerful country.`,
+      `Các môn học tận cùng -ics (Mathematics, Economics, Physics) và news đi với động từ số ít.`
+    ], [[`The United States is a powerful country.`, `Hoa Kỳ là một quốc gia hùng mạnh.`], [`Mathematics is my favorite subject.`, `Toán là môn học yêu thích của tôi.`]]),
+    L(`Either...or, neither...nor`, `chia theo chủ ngữ gần động từ nhất`, [
+      `Neither the manager nor the employees want to work overtime.`,
+      `Either the teacher or the students have the answer.`
+    ], [[`Neither the manager nor the employees want to work overtime.`, `Cả quản lý lẫn nhân viên đều không muốn làm thêm giờ.`]]),
+    L(`The number of, a number of, one of và lượng`, `the number of: số ít. A number of: số nhiều`, [
+      `The number of + N số nhiều dùng động từ số ít: The number of accidents has decreased.`,
+      `A number of + N số nhiều (nghĩa là nhiều) dùng động từ số nhiều: A number of students are absent.`,
+      `One of + N số nhiều dùng động từ số ít: One of my friends is moving to Canada.`,
+      `Lượng tiền, thời gian, khoảng cách xem như một khối nên số ít: Ten dollars is not enough.`
+    ], [[`The number of accidents has decreased.`, `Số vụ tai nạn đã giảm.`], [`A number of students are absent.`, `Nhiều học sinh vắng mặt.`]])
+  ], [
+    `The number of cars has risen, không phải have. A number of cars have risen mới dùng số nhiều.`,
+    `One of the main reasons is cost, không phải are.`,
+    `Mathematics, news và The United States đều đi với động từ số ít.`
+  ], [
+    Q(`Two-thirds of the students ___ present.`, [`is`, `are`, `was`, `has been`], 1, `Theo danh từ sau of: the students (số nhiều).`),
+    Q(`Fifty percent of the work ___ completed.`, [`are`, `is`, `were`, `have been`], 1, `Theo danh từ sau of: the work (không đếm được, số ít).`),
+    Q(`Mathematics ___ my favorite subject.`, [`are`, `is`, `were`, `be`], 1, `Môn học tận cùng -ics đi với động từ số ít.`),
+    Q(`Neither the manager nor the employees ___ to work overtime.`, [`wants`, `want`, `is wanting`, `has wanted`], 1, `Chia theo chủ ngữ gần nhất: the employees (số nhiều).`),
+    Q(`The number of cars ___ risen sharply.`, [`have`, `has`, `are`, `were`], 1, `The number of dùng động từ số ít.`),
+    Q(`One of the main reasons ___ cost.`, [`are`, `is`, `were`, `have been`], 1, `One of + N số nhiều dùng động từ số ít.`)
+  ])
+];
+UNITS.push(...PHAN5);
+
+/* ===================== PHẦN 6: CẤU TRÚC NÂNG CAO ===================== */
+const mk6 = mkIn(`Nội dung theo tài liệu Tổng quát ngữ pháp tiếng Anh (The Forum Center), Phần 6: Cấu trúc nâng cao.`);
+const PHAN6 = [
+  mk6('u27', `Câu điều kiện loại 0, 1, 2`, `Sự thật hiển nhiên, khả năng có thật ở tương lai và giả định không có thật ở hiện tại.`, [
+    L(`Loại 0 và loại 1`, `If + hiện tại đơn, hiện tại đơn / will + V`, [
+      `Loại 0: sự thật hiển nhiên, quy luật tự nhiên. If you heat water to 100 degrees Celsius, it boils.`,
+      `Loại 1: khả năng có thật trong tương lai. If it rains tomorrow, we will cancel the picnic.`,
+      `Không dùng will trong mệnh đề If. Sai: If it will rain. Đúng: If it rains.`
+    ], [[`If you heat water to 100 degrees Celsius, it boils.`, `Nếu đun nước đến 100 độ C, nước sẽ sôi.`], [`If it rains tomorrow, we will cancel the picnic.`, `Nếu ngày mai trời mưa, chúng ta sẽ hủy buổi dã ngoại.`]]),
+    L(`Loại 2`, `If + quá khứ đơn, would + V`, [
+      `Giả định không có thật ở hiện tại hoặc tương lai: If I were you, I would apply for that job.`,
+      `Trong văn phong trang trọng dùng were cho mọi chủ ngữ: If I were you; If she were here.`
+    ], [[`If I were you, I would apply for that job.`, `Nếu là bạn thì tôi sẽ nộp đơn vào vị trí đó.`], [`If she had more time, she would travel more.`, `Nếu có nhiều thời gian hơn, cô ấy sẽ đi du lịch nhiều hơn.`]])
+  ], [
+    `Không dùng will trong mệnh đề If: If it rains, không phải If it will rain.`,
+    `Loại 2 dùng quá khứ đơn trong mệnh đề If và would + V ở mệnh đề chính. Không dùng would trong mệnh đề If.`,
+    `If I were you (văn phong trang trọng), không dùng If I was you.`
+  ], [
+    Q(`If you heat water to 100 degrees Celsius, it ___ .`, [`boils`, `will boiled`, `would boil`, `boiled`], 0, `Đây là sự thật khoa học (loại 0): If + hiện tại đơn, hiện tại đơn.`),
+    Q(`If it ___ tomorrow, we will cancel the picnic.`, [`will rain`, `rains`, `rained`, `would rain`], 1, `Loại 1: mệnh đề If dùng hiện tại đơn, không dùng will.`),
+    Q(`If I ___ you, I would apply for that job.`, [`am`, `were`, `will be`, `have been`], 1, `Loại 2 dùng were cho mọi chủ ngữ trong văn phong trang trọng.`),
+    Q(`If she had more time, she ___ more.`, [`would travel`, `will travel`, `travels`, `traveled`], 0, `Loại 2: If + quá khứ đơn, would + V.`),
+    Q(`Chọn câu đúng.`, [`If it will rain, we stay home.`, `If it rains, we will stay home.`, `If it rained, we will stay home.`, `If it would rain, we stay home.`], 1, `Loại 1: If + hiện tại đơn, will + V.`),
+    Q(`Câu điều kiện loại 2 diễn tả điều gì?`, [`Giả định không có thật ở hiện tại hoặc tương lai`, `Sự thật hiển nhiên`, `Khả năng có thật ở tương lai`, `Giả định không có thật trong quá khứ`], 0, `Loại 2 dùng cho giả định không có thật ở hiện tại hoặc tương lai.`)
+  ]),
+
+  mk6('u28', `Câu điều kiện loại 3, hỗn hợp, unless và đảo ngữ`, `Giả định trái với quá khứ, câu hỗn hợp và cách viết trang trọng.`, [
+    L(`Loại 3 và câu hỗn hợp`, `If + had + V3, would have + V3`, [
+      `Loại 3: giả định không có thật trong quá khứ. If she had studied harder, she would have passed the exam.`,
+      `Câu hỗn hợp: điều kiện trái với quá khứ, kết quả trái với hiện tại. If he had taken the medicine, he would be feeling better now.`,
+      `Câu hỗn hợp kết hợp mệnh đề If của loại 3 với mệnh đề chính của loại 2.`
+    ], [[`If she had studied harder, she would have passed the exam.`, `Nếu học chăm chỉ hơn thì cô ấy đã vượt qua kỳ thi.`], [`If he had taken the medicine, he would be feeling better now.`, `Nếu đã uống thuốc thì bây giờ anh ấy đã thấy khỏe hơn.`]]),
+    L(`Unless và đảo ngữ`, `unless = if ... not. Should you... / Had she...`, [
+      `Unless = If ... not: Unless you hurry, you will miss the bus. = If you don't hurry, you will miss the bus.`,
+      `Đảo ngữ trang trọng: Should you need help, ... (= If you need help).`,
+      `Had she studied harder, ... (= If she had studied harder).`
+    ], [[`Unless you hurry, you will miss the bus.`, `Trừ khi bạn nhanh lên, bạn sẽ lỡ xe buýt.`], [`Had she studied harder, she would have passed.`, `Giá mà cô ấy học chăm hơn thì đã đỗ.`]])
+  ], [
+    `Loại 3 dùng had + V3 trong mệnh đề If, không dùng would have trong mệnh đề If.`,
+    `Không dùng unless kèm not.`,
+    `Đảo ngữ Had she studied: bỏ if và đưa had lên trước chủ ngữ.`
+  ], [
+    Q(`If she had studied harder, she ___ the exam.`, [`would have passed`, `would pass`, `will pass`, `passed`], 0, `Loại 3: If + had + V3, would have + V3.`),
+    Q(`If they had left earlier, they ___ the flight.`, [`would not have missed`, `would not miss`, `will not miss`, `did not miss`], 0, `Giả định trái với quá khứ nên dùng would not have missed.`),
+    Q(`If he had taken the medicine, he ___ better now.`, [`would be feeling`, `would have felt`, `will feel`, `felt`], 0, `Câu hỗn hợp: If + had + V3, would + V (kết quả ở hiện tại).`),
+    Q(`Unless you hurry, you ___ the bus.`, [`will miss`, `would have missed`, `missed`, `won't miss`], 0, `Unless = if you don't hurry, nên vế chính là will miss.`),
+    Q(`___ she studied harder, she would have passed the exam. (đảo ngữ)`, [`Had`, `Should`, `Were`, `Did`], 0, `Đảo ngữ của loại 3: Had + S + V3.`),
+    Q(`Câu nào tương đương với If you need help, call me?`, [`Should you need help, call me.`, `Had you need help, call me.`, `Were you need help, call me.`, `Unless you need help, call me.`], 0, `Đảo ngữ của loại 1: Should + S + V nguyên mẫu.`)
+  ]),
+
+  mk6('u29', `Câu bị động`, `Cấu trúc bị động và cách chuyển theo từng thì.`, [
+    L(`Cấu trúc bị động`, `O + to be + V3 (+ by S)`, [
+      `Câu bị động nhấn mạnh hành động hoặc đối tượng chịu tác động, không nhấn mạnh chủ thể.`,
+      `Active: The chef cooks the meal. Passive: The meal is cooked by the chef.`,
+      `Không phải lúc nào cũng cần by + chủ thể, nhất là khi chủ thể không quan trọng, không rõ hoặc đã biết: My bike was stolen.`,
+      `Chỉ động từ có tân ngữ (ngoại động từ) mới chuyển sang bị động được. Sai: The accident was happened. Đúng: The accident happened.`
+    ], [[`The meal is cooked by the chef.`, `Bữa ăn do đầu bếp nấu.`], [`My bike was stolen.`, `Xe đạp của tôi bị lấy trộm.`]]),
+    L(`Bị động theo thì`, `be (chia theo thì) + V3`, [
+      `Hiện tại đơn: is/am/are + V3. English is spoken worldwide.`,
+      `Hiện tại tiếp diễn: is/am/are + being + V3. The road is being repaired.`,
+      `Quá khứ đơn: was/were + V3. The bridge was built in 1990.`,
+      `Quá khứ tiếp diễn: was/were + being + V3. The car was being washed when I arrived.`,
+      `Hiện tại hoàn thành: has/have + been + V3. The report has been finished.`,
+      `Quá khứ hoàn thành: had + been + V3. The tickets had been sold before we arrived.`,
+      `Tương lai đơn: will + be + V3. The results will be announced tomorrow.`,
+      `Động từ khuyết thiếu: modal + be + V3. The problem must be solved quickly.`
+    ], [[`English is spoken worldwide.`, `Tiếng Anh được nói trên toàn thế giới.`], [`The results will be announced tomorrow.`, `Kết quả sẽ được công bố vào ngày mai.`]])
+  ], [
+    `Nội động từ như happen, arrive, occur không dùng bị động: The accident happened.`,
+    `Phải có be + V3: The bridge was built, không phải The bridge built.`,
+    `Giữ nguyên thì của câu chủ động khi chuyển sang bị động.`
+  ], [
+    Q(`English ___ all over the world.`, [`speaks`, `is spoken`, `is speaking`, `spoke`], 1, `Tiếng Anh được nói, nên dùng bị động hiện tại đơn: is spoken.`),
+    Q(`The bridge ___ in 1990.`, [`built`, `was built`, `is built`, `has built`], 1, `Mốc 1990 là quá khứ và cây cầu được xây, nên dùng was built.`),
+    Q(`The road ___ repaired at the moment.`, [`is being`, `is`, `has been being`, `was`], 0, `At the moment cho thấy việc đang diễn ra: bị động hiện tại tiếp diễn is being repaired.`),
+    Q(`The results ___ tomorrow.`, [`will announce`, `will be announced`, `are announce`, `announced`], 1, `Bị động tương lai đơn: will be + V3.`),
+    Q(`The report ___ finished, so you can read it now.`, [`has been`, `is being`, `was being`, `will be`], 0, `Báo cáo đã xong và còn kết quả ở hiện tại: has been finished.`),
+    Q(`Chọn câu đúng.`, [`The accident was happened yesterday.`, `The accident happened yesterday.`, `The accident has been happened yesterday.`, `The accident is happened yesterday.`], 1, `Happen là nội động từ nên không dùng bị động.`)
+  ]),
+
+  mk6('u30', `Động từ khuyết thiếu và modal perfect`, `Nghĩa của các modal, mức độ chắc chắn và cấu trúc modal + have + V3.`, [
+    L(`Động từ khuyết thiếu`, `modal + V nguyên thể không to`, [
+      `can/could: có thể (khả năng, xin phép). She can play the piano.`,
+      `may/might: có thể (khả năng thấp hơn). It might rain later.`,
+      `must: phải (nghĩa vụ mạnh) hoặc chắc hẳn (suy luận). You must finish your homework.`,
+      `should/ought to: nên (lời khuyên). You should see a doctor.`,
+      `will/would: sẽ (tương lai), đề nghị lịch sự. Would you like some tea?`,
+      `Mức độ chắc chắn tăng dần: might/may/could, rồi should, rồi must.`
+    ], [[`She can play the piano.`, `Cô ấy có thể chơi piano.`], [`You should see a doctor.`, `Bạn nên đi khám bác sĩ.`]]),
+    L(`Modal perfect`, `modal + have + V3`, [
+      `must have + V3: chắc hẳn đã (suy luận gần như chắc chắn). He must have missed the train.`,
+      `could/might have + V3: có thể đã, hoặc đã có thể làm nhưng không làm. They could have helped us.`,
+      `should have + V3: lẽ ra nên (hối tiếc, trách móc). You should have told me earlier.`,
+      `can't have + V3: không thể nào đã. She can't have finished already; she only started an hour ago.`
+    ], [[`He must have missed the train.`, `Anh ấy chắc hẳn đã lỡ chuyến tàu.`], [`You should have told me earlier.`, `Lẽ ra bạn nên nói với tôi sớm hơn.`]])
+  ], [
+    `Sau động từ khuyết thiếu không chia động từ: She must go, không phải She must goes.`,
+    `Modal perfect dùng have + V3, không dùng V-ing: should have studied.`,
+    `Might, may, could kém chắc chắn hơn must.`
+  ], [
+    Q(`She can ___ the piano.`, [`plays`, `play`, `to play`, `playing`], 1, `Sau can dùng động từ nguyên thể không to.`),
+    Q(`The ground is wet. It ___ last night.`, [`must have rained`, `must rain`, `should rain`, `can rained`], 0, `Suy luận gần như chắc chắn về quá khứ: must have + V3.`),
+    Q(`You failed the test. You ___ harder.`, [`should have studied`, `should study`, `must studied`, `can study`], 0, `Lẽ ra nên làm nhưng đã không làm: should have + V3.`),
+    Q(`She only started an hour ago, so she ___ finished already.`, [`can't have`, `must have`, `needs have`, `ought have`], 0, `Không thể nào đã xong: can't have + V3.`),
+    Q(`He is not here. He ___ the train.`, [`must have missed`, `must miss`, `should missed`, `can't missing`], 0, `Suy luận về quá khứ: must have + V3.`),
+    Q(`Từ nào diễn tả lời khuyên nên làm?`, [`should`, `must`, `might`, `could`], 0, `Should dùng cho lời khuyên. Must là nghĩa vụ mạnh, might diễn tả khả năng thấp.`)
+  ])
+];
+UNITS.push(...PHAN6);
+
+/* ===================== BÀI KIỂM TRA CUỐI PHẦN (20 câu, cần đúng trên 80% để mở phần tiếp theo) ===================== */
+const mkTest = (n, quiz) => ({ id: `t${n}`, part: `p${n}`, title: `Bài kiểm tra Phần ${n}`, quiz });
+const TESTS = [
+  mkTest(1, [
+    Q(`She gave a ___ answer.`, [`correct`, `correctly`, `correction`, `correcting`], 0, `Trước danh từ answer cần tính từ: correct.`),
+    Q(`He speaks English very ___ .`, [`fluent`, `fluently`, `fluency`, `fluents`], 1, `Từ bổ nghĩa cho động từ speaks là trạng từ: fluently.`),
+    Q(`The ___ of the building took two years.`, [`construct`, `construction`, `constructive`, `constructively`], 1, `Sau mạo từ the cần danh từ: construction.`),
+    ERR(`She`, [`feels`, `happily`, `because she passed`, `the exam`], `.`, 1, `Sau động từ liên kết feel dùng tính từ: happy.`),
+    Q(`We need more ___ about the project.`, [`informations`, `information`, `an information`, `informing`], 1, `Information là danh từ không đếm được, không thêm s và không dùng an.`),
+    Q(`My cousin is ___ honest man.`, [`a`, `an`, `the`, `(không dùng mạo từ)`], 1, `Honest bắt đầu bằng âm nguyên âm vì h không đọc, nên dùng an.`),
+    Q(`The cat licked ___ paws.`, [`it's`, `its`, `it`, `itself`], 1, `Its là tính từ sở hữu, nghĩa là của nó.`),
+    ERR(``, [`Me and my friend`, `went`, `to the cinema`, `yesterday`], `.`, 0, `Làm chủ ngữ phải dùng đại từ chủ cách: My friend and I.`),
+    Q(`He decided ___ a new job.`, [`looking for`, `to look for`, `look for`, `looked for`], 1, `Sau decide dùng to + động từ nguyên thể.`),
+    Q(`They avoided ___ the mistake again.`, [`to make`, `making`, `make`, `made`], 1, `Sau avoid dùng V-ing.`),
+    ERR(`He`, [`speaks`, `English`, `fluently`, `always`], `.`, 3, `Trạng từ tần suất đứng trước động từ thường: He always speaks English fluently.`),
+    Q(`She is ___ girl in her class.`, [`the tallest`, `taller`, `more tall`, `the more tall`], 0, `So sánh trong một nhóm từ ba người trở lên dùng so sánh nhất: the tallest.`),
+    Q(`She is interested ___ art.`, [`on`, `in`, `at`, `with`], 1, `Interested in là cụm cố định.`),
+    Q(`He is afraid ___ the dark.`, [`of`, `from`, `with`, `at`], 0, `Afraid of là cụm cố định.`),
+    Q(`She studied hard, ___ she failed the exam.`, [`so`, `yet`, `because`, `or`], 1, `Học chăm nhưng vẫn trượt là hai ý đối lập bất ngờ nên dùng yet.`),
+    Q(`I did not sleep well, ___ I am tired today.`, [`because`, `so`, `but`, `nor`], 1, `Không ngủ ngon là nguyên nhân, mệt là kết quả nên dùng so.`),
+    Q(`You cannot park here. It is ___ .`, [`legal`, `illegal`, `unlegal`, `dislegal`], 1, `Phủ định của legal là illegal (từ bắt đầu bằng l dùng il-).`),
+    Q(`He made a big ___ in his English.`, [`improve`, `improvement`, `improving`, `improvely`], 1, `Sau tính từ big cần danh từ: improvement.`),
+    Q(`She is a very ___ person who always helps others.`, [`help`, `helpful`, `helpfully`, `helpfulness`], 1, `Trước danh từ person cần tính từ: helpful.`),
+    ERR(`They`, [`need`, `to`, `strength`, `their teamwork skills`], `.`, 2, `Sau to cần động từ: strengthen.`)
+  ]),
+
+  mkTest(2, [
+    Q(`Nhóm từ nào KHÔNG thể đứng riêng thành câu?`, [`She reads books.`, `because she loves stories`, `They played basketball.`, `He is rich.`], 1, `Because she loves stories là mệnh đề phụ thuộc nên không đứng riêng được.`),
+    Q(`She reads books, and he writes poems. Câu này có mấy mệnh đề độc lập?`, [`1`, `2`, `3`, `0`], 1, `She reads books và he writes poems là hai mệnh đề độc lập.`),
+    Q(`Because it was late, we went home. Đây là kiểu câu nào?`, [`Câu đơn`, `Câu ghép`, `Câu phức`, `Câu ghép phức`], 2, `Có 1 mệnh đề phụ thuộc (Because it was late) và 1 mệnh đề độc lập nên là câu phức.`),
+    Q(`Mệnh đề phụ thuộc thường mở đầu bằng gì?`, [`Liên từ phụ thuộc hoặc đại từ quan hệ`, `Dấu chấm`, `Mạo từ`, `Giới từ chỉ nơi chốn`], 0, `Liên từ phụ thuộc (because, although...) hoặc đại từ quan hệ mở đầu mệnh đề phụ thuộc.`),
+    Q(`Câu nào có vị ngữ ghép?`, [`She danced and sang.`, `John and Mary left.`, `They arrived.`, `She sings, and he dances.`], 0, `Danced và sang là hai động từ dùng chung chủ ngữ she.`),
+    Q(`Câu nào có chủ ngữ ghép?`, [`John and Mary went to the store.`, `She danced and sang.`, `He ran.`, `It rained, so we left.`], 0, `John and Mary là hai chủ ngữ dùng chung động từ.`),
+    Q(`Câu nào là câu đơn?`, [`The students studied hard.`, `The students studied, but they failed.`, `The students failed because they did not study.`, `Although they studied, they failed.`], 0, `Chỉ có một mệnh đề độc lập.`),
+    Q(`Một câu đơn chứa bao nhiêu mệnh đề độc lập?`, [`1`, `2`, `3`, `Không có`], 0, `Câu đơn chỉ có một mệnh đề độc lập.`),
+    Q(`He doesn't smoke, ___ does he drink.`, [`nor`, `or`, `but`, `so`], 0, `Nor nghĩa là cũng không, dùng với phủ định bổ sung.`),
+    Q(`Hurry up, ___ you will miss the bus.`, [`and`, `or`, `so`, `yet`], 1, `Or chỉ lựa chọn hoặc hậu quả nếu không làm: nhanh lên, nếu không sẽ lỡ xe.`),
+    Q(`Chọn câu đúng.`, [`She studied hard, she failed the exam.`, `She studied hard, yet she failed the exam.`, `She studied hard yet, she failed the exam.`, `She studied hard; yet she failed, the exam.`], 1, `Hai mệnh đề độc lập nối bằng dấu phẩy và liên từ kết hợp yet.`),
+    Q(`He stayed home, ___ he was ill.`, [`for`, `so`, `but`, `or`], 0, `For nghĩa là vì, chỉ nguyên nhân.`),
+    Q(`We went out ___ it was raining.`, [`although`, `because`, `unless`, `so that`], 0, `Trời mưa nhưng vẫn ra ngoài là nhượng bộ nên dùng although.`),
+    Q(`___ you hurry, you will miss the bus.`, [`Unless`, `Because`, `Although`, `Until`], 0, `Unless = if ... not: trừ khi bạn nhanh lên.`),
+    Q(`Chọn câu đúng.`, [`After we finished dinner, we watched a movie.`, `After we finished dinner we, watched a movie.`, `After, we finished dinner we watched a movie.`, `After we finished dinner; we watched a movie.`], 0, `Mệnh đề phụ thuộc đứng trước cần dấu phẩy rồi mới đến mệnh đề chính.`),
+    Q(`I will wait here ___ you come back.`, [`until`, `although`, `because`, `as if`], 0, `Until nghĩa là cho đến khi, chỉ thời gian.`),
+    Q(`Chọn câu đúng.`, [`Where are you going.`, `Where are you going?`, `Where are you going!`, `Where are you going,`], 1, `Câu hỏi kết thúc bằng dấu chấm hỏi.`),
+    Q(`Câu nào dùng dấu phẩy Oxford?`, [`I bought apples, oranges, and bananas.`, `I bought apples, oranges and bananas.`, `I bought apples oranges and bananas.`, `I bought apples; oranges; and bananas.`], 0, `Dấu phẩy Oxford là dấu phẩy đặt trước and trong danh sách.`),
+    ERR(`She`, [`enjoys`, `reading,`, `and`, `watching movies`], `.`, 1, `Chỉ liệt kê hai đối tượng nên không cần dấu phẩy: reading and watching movies.`),
+    Q(`Chọn cách sửa tốt nhất cho If you study hard you will pass the exam.`, [`If you study hard, you will pass the exam.`, `If you study hard; you will pass the exam.`, `If you study, hard you will pass the exam.`, `If you study hard you, will pass the exam.`], 0, `Mệnh đề If đứng trước cần dấu phẩy.`)
+  ]),
+
+  mkTest(3, [
+    Q(`I don't know where ___ .`, [`does he live`, `he lives`, `lives he`, `is he living`], 1, `Mệnh đề danh từ có trật tự S + V: where he lives.`),
+    Q(`She asked me ___ I could help her.`, [`whether`, `what`, `who`, `where`], 0, `Mệnh đề danh từ dạng Yes/No cần whether hoặc if.`),
+    Q(`___ she said is important.`, [`What`, `Where`, `Whether`, `That`], 0, `What mở đầu mệnh đề danh từ làm chủ ngữ, nghĩa là điều mà.`),
+    Q(`Mẹo nhận biết mệnh đề danh từ là gì?`, [`Thử thay mệnh đề bằng it hoặc something`, `Thêm dấu phẩy trước mệnh đề`, `Đổi động từ sang quá khứ`, `Bỏ chủ ngữ`], 0, `Thay được bằng it hoặc something thì đó là mệnh đề danh từ.`),
+    ERR(`I`, [`don't know`, `what`, `is he`, `doing`], `.`, 2, `Mệnh đề danh từ không đảo: what he is doing.`),
+    Q(`The man ___ I met was kind.`, [`whom`, `which`, `whose`, `where`], 0, `The man là người, làm tân ngữ của met nên dùng whom (hoặc who, that).`),
+    Q(`The book ___ you gave me is fascinating.`, [`that`, `who`, `whose`, `where`], 0, `The book là vật nên dùng that hoặc which.`),
+    Q(`People ___ exercise regularly tend to be healthier.`, [`who`, `which`, `whose`, `whom`], 0, `People là người, từ quan hệ làm chủ ngữ nên dùng who.`),
+    Q(`The museum ___ was renovated is popular.`, [`which`, `who`, `whom`, `whose`], 0, `The museum là vật nên dùng which.`),
+    Q(`Chọn câu đúng.`, [`She is the girl which I met yesterday.`, `She is the girl who I met yesterday.`, `She is the girl whose I met yesterday.`, `She is the girl where I met yesterday.`], 1, `The girl là người, làm tân ngữ nên dùng who hoặc whom, không dùng which.`),
+    Q(`My brother, ___ lives in London, is a teacher.`, [`that`, `who`, `which`, `whom`], 1, `Mệnh đề không xác định không dùng that. Người làm chủ ngữ nên dùng who.`),
+    Q(`Mệnh đề nào được đặt giữa hai dấu phẩy?`, [`Mệnh đề không xác định`, `Mệnh đề xác định`, `Mệnh đề danh từ`, `Mệnh đề điều kiện`], 0, `Mệnh đề không xác định là thông tin thêm nên đặt giữa hai dấu phẩy.`),
+    Q(`My mother, who is a teacher, loves reading. Nếu bỏ who is a teacher thì câu thế nào?`, [`Vẫn rõ nghĩa`, `Mất nghĩa hoàn toàn`, `Sai ngữ pháp`, `Trở thành câu hỏi`], 0, `Mệnh đề không xác định là thông tin thêm, bỏ đi câu vẫn rõ nghĩa.`),
+    Q(`The book that is on the table is mine. Mệnh đề that is on the table là loại nào?`, [`Xác định`, `Không xác định`, `Mệnh đề danh từ`, `Mệnh đề trạng ngữ`], 0, `Nó cần thiết để biết cuốn sách nào, không có dấu phẩy nên là mệnh đề xác định.`),
+    Q(`Trong câu The man who lives next door is a doctor, vì sao không thể bỏ who?`, [`Vì who làm chủ ngữ`, `Vì who làm tân ngữ`, `Vì who là liên từ phụ thuộc`, `Vì câu không có dấu phẩy`], 0, `Chỉ được bỏ đại từ quan hệ khi nó làm tân ngữ.`),
+    Q(`I will call you as soon as I ___ home.`, [`get`, `will get`, `got`, `am getting`], 0, `Mệnh đề thời gian dùng hiện tại để nói về tương lai.`),
+    Q(`He was so tired ___ he fell asleep.`, [`that`, `which`, `what`, `who`], 0, `Cấu trúc so + tính từ + that chỉ kết quả.`),
+    Q(`She stayed at home ___ she was sick.`, [`because`, `although`, `unless`, `until`], 0, `Bị ốm là nguyên nhân nên dùng because.`),
+    Q(`Tôi sẽ ra ngoài trừ khi trời mưa. Chọn từ phù hợp: I will go out ___ it rains.`, [`unless`, `although`, `because`, `so that`], 0, `Unless nghĩa là trừ khi.`),
+    ERR(`I`, [`will call`, `you`, `when`, `I will arrive`], `.`, 3, `Mệnh đề thời gian dùng hiện tại: when I arrive.`)
+  ]),
+
+  mkTest(4, [
+    Q(`My sister ___ to school by bus every day.`, [`go`, `goes`, `is going`, `going`], 1, `Every day chỉ thói quen, chủ ngữ ngôi thứ ba số ít nên dùng goes.`),
+    Q(`Listen! Someone ___ at the door.`, [`knocks`, `is knocking`, `knock`, `has knocked`], 1, `Listen! báo hiệu việc đang diễn ra nên dùng hiện tại tiếp diễn.`),
+    Q(`She ___ the answer.`, [`is knowing`, `knows`, `know`, `are knowing`], 1, `Know là động từ chỉ trạng thái nên không dùng tiếp diễn.`),
+    Q(`I ___ to the cinema yesterday.`, [`go`, `went`, `have gone`, `was going`], 1, `Yesterday là mốc quá khứ nên dùng quá khứ đơn.`),
+    Q(`She ___ when I called.`, [`slept`, `was sleeping`, `sleeps`, `has slept`], 1, `Việc đang diễn ra thì có việc xen vào (I called) nên dùng quá khứ tiếp diễn.`),
+    Q(`They ___ the exam last week.`, [`didn't pass`, `don't pass`, `haven't passed`, `not pass`], 0, `Last week là mốc quá khứ nên dùng didn't + động từ nguyên mẫu.`),
+    Q(`I ___ English since 2020.`, [`learn`, `learned`, `have learned`, `am learning`], 2, `Since 2020 là việc bắt đầu từ quá khứ và còn đến nay nên dùng hiện tại hoàn thành.`),
+    Q(`She ___ in Paris last year.`, [`has been`, `was`, `is`, `has being`], 1, `Last year là mốc quá khứ xác định nên dùng quá khứ đơn.`),
+    Q(`Have you ___ visited Hue?`, [`ever`, `since`, `ago`, `yesterday`], 0, `Ever đi với hiện tại hoàn thành khi hỏi về trải nghiệm.`),
+    Q(`He ___ for three hours and he is still studying.`, [`has been studying`, `studied`, `is study`, `had study`], 0, `Việc học kéo dài đến hiện tại nên dùng hiện tại hoàn thành tiếp diễn.`),
+    Q(`She has been learning English ___ two years.`, [`for`, `since`, `ago`, `during`], 0, `For đi với khoảng thời gian.`),
+    Q(`When we arrived, the film ___ .`, [`had already started`, `has already started`, `already starts`, `was already start`], 0, `Phim bắt đầu trước khi chúng tôi đến nên dùng quá khứ hoàn thành.`),
+    Q(`By the time he arrived, we ___ dinner.`, [`had finished`, `have finished`, `finish`, `finishing`], 0, `Việc ăn xong xảy ra trước việc anh ấy đến nên dùng quá khứ hoàn thành.`),
+    Q(`We were late because the bus ___ already left.`, [`had`, `has`, `is`, `will`], 0, `Xe buýt đã rời đi trước mốc quá khứ nên dùng had already left.`),
+    Q(`I have not decided yet. I think I ___ stay home.`, [`will`, `am going`, `stay`, `have`], 0, `Quyết định và dự đoán không có căn cứ rõ ràng dùng will.`),
+    Q(`We ___ meet them at 9 AM tomorrow. (kế hoạch đã sắp xếp)`, [`are going to`, `are meet`, `is going to`, `will to`], 0, `Kế hoạch đã sắp xếp dùng be going to, và we đi với are.`),
+    Q(`At this time tomorrow, I ___ on a plane.`, [`will be sitting`, `sit`, `have sat`, `am sit`], 0, `Việc sẽ đang diễn ra tại một thời điểm tương lai dùng tương lai tiếp diễn.`),
+    Q(`By the end of this month, I ___ this book.`, [`will have finished`, `will finishing`, `have finish`, `finished`], 0, `By + mốc tương lai nên dùng tương lai hoàn thành.`),
+    Q(`Dấu hiệu since, for, so far thường đi với thì nào?`, [`Hiện tại hoàn thành`, `Quá khứ đơn`, `Tương lai đơn`, `Hiện tại đơn`], 0, `Đây là các dấu hiệu của hiện tại hoàn thành (và hoàn thành tiếp diễn).`),
+    ERR(`They`, [`playing`, `soccer`, `in the park`, `now`], `.`, 0, `Thiếu to be: They are playing soccer.`)
+  ]),
+
+  mkTest(5, [
+    Q(`The students ___ hard for exams.`, [`studies`, `study`, `is studying`, `studying`], 1, `Students là số nhiều nên động từ để nguyên mẫu.`),
+    Q(`She ___ reading books.`, [`enjoy`, `enjoys`, `are enjoying`, `enjoying`], 1, `She là ngôi thứ ba số ít nên động từ thêm s.`),
+    Q(`My brother and I ___ in the same school.`, [`study`, `studies`, `is studying`, `studying`], 0, `Hai chủ ngữ nối bằng and là số nhiều nên động từ không thêm s.`),
+    Q(`Chọn câu đúng.`, [`The dog bark loudly.`, `The dog barks loudly.`, `The dogs barks loudly.`, `The dog are barking loudly.`], 1, `The dog số ít nên động từ thêm s.`),
+    ERR(`My sister and I`, [`is going`, `to`, `the market`, `today`], `.`, 0, `Hai chủ ngữ nối bằng and nên dùng are going.`),
+    Q(`Nobody ___ the answer.`, [`know`, `knows`, `are knowing`, `were known`], 1, `Nobody là đại từ bất định số ít nên động từ thêm s.`),
+    Q(`The furniture in this room ___ new.`, [`are`, `is`, `were`, `have been`], 1, `Furniture là danh từ không đếm được nên động từ số ít.`),
+    Q(`Each of the players ___ a unique skill.`, [`have`, `has`, `are having`, `were`], 1, `Chủ ngữ thật là Each (số ít) nên dùng has.`),
+    Q(`Water ___ essential for life.`, [`are`, `is`, `were`, `have`], 1, `Water không đếm được nên động từ số ít.`),
+    ERR(`Everyone`, [`are`, `excited`, `about`, `the trip`], `.`, 0, `Everyone đi với động từ số ít: Everyone is excited.`),
+    Q(`The basket of fruits ___ on the table.`, [`are`, `is`, `were`, `have been`], 1, `Chủ ngữ chính là The basket (số ít).`),
+    Q(`There ___ a problem with the engine.`, [`are`, `is`, `were`, `have`], 1, `Động từ hòa hợp với a problem (số ít).`),
+    Q(`The staff ___ preparing their reports. (từng cá nhân)`, [`is`, `are`, `was`, `has been`], 1, `Nhấn mạnh từng cá nhân (their reports) nên dùng động từ số nhiều.`),
+    Q(`The police ___ looking for the thief.`, [`is`, `are`, `was`, `has been`], 1, `Police luôn đi với động từ số nhiều.`),
+    ERR(`There`, [`is`, `many`, `options`, `to choose from`], `.`, 0, `Options là số nhiều nên dùng There are many options.`),
+    Q(`The number of accidents on this road ___ decreased.`, [`have`, `has`, `are`, `were`], 1, `The number of dùng động từ số ít.`),
+    Q(`A number of students ___ absent today.`, [`is`, `are`, `was`, `has been`], 1, `A number of nghĩa là nhiều nên dùng động từ số nhiều.`),
+    Q(`Ten dollars ___ not enough to buy the book.`, [`are`, `is`, `were`, `have been`], 1, `Lượng tiền xem như một khối nên dùng số ít.`),
+    Q(`Either the teacher or the students ___ the answer.`, [`has`, `have`, `is having`, `was`], 1, `Chia theo chủ ngữ gần nhất: the students (số nhiều).`),
+    Q(`Economics ___ difficult for some students.`, [`are`, `is`, `were`, `have been`], 1, `Môn học tận cùng -ics đi với động từ số ít.`)
+  ]),
+
+  mkTest(6, [
+    Q(`If you mix red and blue, you ___ purple.`, [`get`, `will got`, `would get`, `getting`], 0, `Sự thật hiển nhiên (loại 0): If + hiện tại đơn, hiện tại đơn.`),
+    Q(`If it ___ sunny tomorrow, we will go to the beach.`, [`is`, `will be`, `was`, `would be`], 0, `Mệnh đề If của loại 1 dùng hiện tại đơn.`),
+    Q(`If I ___ rich, I would travel the world.`, [`am`, `were`, `will be`, `have been`], 1, `Loại 2 dùng were trong văn phong trang trọng.`),
+    Q(`Chọn câu đúng.`, [`If it will rain, we will stay inside.`, `If it rains, we will stay inside.`, `If it rain, we will stay inside.`, `If it rained, we will stay inside.`], 1, `Loại 1: If + hiện tại đơn, will + V.`),
+    Q(`If she ___ more time, she would travel more.`, [`has`, `had`, `will have`, `would have`], 1, `Loại 2: If + quá khứ đơn, would + V.`),
+    Q(`If we had trained harder, we ___ the match.`, [`would have won`, `would win`, `will win`, `won`], 0, `Loại 3: If + had + V3, would have + V3.`),
+    Q(`If I had studied medicine, I ___ a doctor now.`, [`would be`, `would have been`, `will be`, `was`], 0, `Câu hỗn hợp: kết quả ở hiện tại dùng would + V.`),
+    Q(`Unless tương đương với cấu trúc nào?`, [`if ... not`, `if ... will`, `although`, `because`], 0, `Unless = if ... not.`),
+    Q(`___ you need help, please call me. (đảo ngữ)`, [`Should`, `Had`, `Were`, `Did`], 0, `Đảo ngữ của loại 1: Should + S + V.`),
+    ERR(`If she`, [`would have studied`, `harder,`, `she would have`, `passed the exam`], `.`, 0, `Mệnh đề If của loại 3 dùng had + V3: had studied.`),
+    Q(`The meal ___ by the chef.`, [`is cooked`, `cooks`, `is cooking`, `cooking`], 0, `Bị động hiện tại đơn: is + V3.`),
+    Q(`My bike ___ yesterday.`, [`was stolen`, `stole`, `is stolen`, `was stealing`], 0, `Bị động quá khứ đơn: was + V3.`),
+    Q(`The problem must ___ quickly.`, [`be solved`, `solve`, `is solved`, `been solved`], 0, `Bị động với modal: modal + be + V3.`),
+    Q(`The tickets ___ before we arrived.`, [`had been sold`, `have been sold`, `were selling`, `sold`], 0, `Bị động quá khứ hoàn thành: had been + V3.`),
+    Q(`Câu nào KHÔNG thể chuyển sang bị động?`, [`The accident happened.`, `The chef cooks the meal.`, `They built the bridge.`, `People speak English.`], 0, `Happen là nội động từ, không có tân ngữ nên không có bị động.`),
+    Q(`You ___ see a doctor. (lời khuyên)`, [`should`, `might`, `can't`, `would have`], 0, `Should dùng cho lời khuyên.`),
+    Q(`The lights are off. They ___ gone to bed.`, [`must have`, `must`, `should to have`, `can have`], 0, `Suy luận về quá khứ: must have + V3.`),
+    Q(`You ___ told me earlier. (trách móc)`, [`should have`, `should`, `must`, `might`], 0, `Lẽ ra nên làm: should have + V3.`),
+    Q(`It ___ rain later, but I am not sure.`, [`might`, `must`, `should have`, `can't have`], 0, `Might diễn tả khả năng thấp, không chắc chắn.`),
+    Q(`Sau động từ khuyết thiếu dùng dạng động từ nào?`, [`Nguyên thể không to`, `To + nguyên thể`, `V-ing`, `V3`], 0, `Sau modal luôn là động từ nguyên thể không to.`)
+  ])
+];
+
+/* ===================== CÁC PHẦN (theo mục lục tài liệu) =====================
+   Mỗi phần chứa danh sách id bài (theo thứ tự học). Cuối mỗi phần có một bài kiểm tra (TESTS). */
+const PARTS = [
+  { id: 'p1', no: 1, title: `Từ loại và cấu tạo từ`, desc: `Từ loại, vị trí trong câu, các lỗi thường gặp và cấu tạo từ.`, units: ['u4', 'u5', 'u6', 'u7', 'u8'] },
+  { id: 'p2', no: 2, title: `Các kiểu câu và dấu câu`, desc: `Câu đơn, câu ghép, câu phức và dấu câu cơ bản.`, units: ['u9', 'u10', 'u11', 'u12', 'u13'] },
+  { id: 'p3', no: 3, title: `Mệnh đề`, desc: `Mệnh đề danh từ, mệnh đề quan hệ và mệnh đề trạng ngữ.`, units: ['u14', 'u15', 'u16', 'u17'] },
+  { id: 'p4', no: 4, title: `Thì động từ`, desc: `Các thì hiện tại, quá khứ, tương lai và lỗi thường gặp.`, units: ['u1', 'u3', 'u18', 'u2', 'u19', 'u20', 'u21', 'u22'] },
+  { id: 'p5', no: 5, title: `Hòa hợp chủ ngữ và động từ`, desc: `Chia động từ đúng theo chủ ngữ số ít và số nhiều.`, units: ['u23', 'u24', 'u25', 'u26'] },
+  { id: 'p6', no: 6, title: `Cấu trúc nâng cao`, desc: `Câu điều kiện, câu bị động và động từ khuyết thiếu.`, units: ['u27', 'u28', 'u29', 'u30'] }
+];
+
+/* ===================== TIỆN ÍCH ===================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const stripTags = s => String(s).replace(/<[^>]*>/g, '');
+const day = (o = 0) => new Date(Date.now() + o * 864e5).toLocaleDateString('en-CA');
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+let toastTimer;
+function toast(m) {
+  const t = $('#toast');
+  t.textContent = m; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 3200);
+}
+
+/* ===================== DỮ LIỆU BÀI ===================== */
+const U = id => UNITS.find(u => u.id === id);
+const passMark = u => Math.ceil(u.quiz.length * 0.75);        /* bài học: đúng từ 75% */
+const testPass = (s, n) => s * 5 > n * 4;                      /* bài kiểm tra: đúng trên 80% */
+const testNeed = n => Math.floor(n * 4 / 5) + 1;               /* 20 câu: cần ít nhất 17 */
+const partOf = id => PARTS.find(p => p.units.includes(id));
+const partUnits = pt => pt.units.map(U).filter(Boolean);
+const partTest = pt => TESTS.find(t => t.part === pt.id);
+const testPart = t => PARTS.find(p => p.id === t.part);
+function getQ(id) {
+  const m = /^([ut]\d+):(\d+)$/.exec(id || '');
+  if (!m) return null;
+  const src = m[1][0] === 'u' ? UNITS.find(x => x.id === m[1]) : TESTS.find(x => x.id === m[1]);
+  return src && src.quiz[+m[2]] ? { u: src, q: src.quiz[+m[2]], i: +m[2] } : null;
+}
+
+/* ===================== TIẾN ĐỘ ===================== */
+const emptyP = () => ({ units: {}, tests: {}, wrong: [] });
+/* Làm sạch dữ liệu đọc từ máy chủ (không tin hoàn toàn dữ liệu bên ngoài) */
+function cleanP(o) {
+  const p = emptyP();
+  if (!o || typeof o !== 'object') return p;
+  UNITS.forEach(u => { const s = o.units && o.units[u.id]; if (s && Number.isFinite(+s.best)) p.units[u.id] = { best: clamp(Math.floor(+s.best), 0, u.quiz.length) }; });
+  TESTS.forEach(t => { const s = o.tests && o.tests[t.id]; if (s && Number.isFinite(+s.best)) p.tests[t.id] = { best: clamp(Math.floor(+s.best), 0, t.quiz.length) }; });
+  if (Array.isArray(o.wrong)) p.wrong = [...new Set(o.wrong.filter(id => typeof id === 'string' && getQ(id)))];
+  return p;
+}
+const isDone = (p, u) => !!p.units[u.id] && p.units[u.id].best >= passMark(u);
+const testPassed = (p, t) => !!p.tests[t.id] && testPass(p.tests[t.id].best, t.quiz.length);
+const itemsOf = pt => [...partUnits(pt).map(u => ({ kind: 'unit', o: u })), ...(partTest(pt) ? [{ kind: 'test', o: partTest(pt) }] : [])];
+const allItems = () => PARTS.flatMap(itemsOf);
+const itemDone = (p, it) => it.kind === 'unit' ? isDone(p, it.o) : testPassed(p, it.o);
+function itemState(p, it) {
+  if (itemDone(p, it)) return 'done';
+  return (it.kind === 'unit' ? p.units[it.o.id] : p.tests[it.o.id]) ? 'prog' : 'none';
+}
+/* Tổng số mục và % hoàn thành luôn tính từ các bài đang hiển thị trong các phần (gồm bài học và bài kiểm tra) */
+function stats(p) {
+  const its = allItems();
+  return { total: its.length, done: its.filter(i => itemDone(p, i)).length, wrong: p.wrong.length };
+}
+
+/* ===================== BACKEND ===================== */
+const CONFIGURED = !!(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.projectId);
+
+const FirebaseBackend = {
+  mode: 'firebase',
+  init(cb) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    this.auth = firebase.auth();
+    this.db = firebase.firestore();
+    this.auth.onAuthStateChanged(u => cb(u ? { uid: u.uid, user: String(u.email || '').split('@')[0] } : null));
+  },
+  login(user, pw) { return this.auth.signInWithEmailAndPassword(user + '@' + EMAIL_DOMAIN, pw); },
+  logout() { return this.auth.signOut(); },
+  async load(uid) { const d = await this.db.collection('progress').doc(uid).get(); return d.exists ? d.data() : null; },
+  save(uid, data) { return this.db.collection('progress').doc(uid).set(data); },
+  stamp() { return firebase.firestore.FieldValue.serverTimestamp(); },
+  subscribeStudents(cb) { return this.db.collection('progress').onSnapshot(snap => cb(snap.docs.map(d => d.data())), err => cb(null, err)); }
+};
+
+/* Chế độ xem thử: dùng khi chưa dán cấu hình Firebase. Dữ liệu chỉ lưu trong trình duyệt này. */
+const PreviewBackend = {
+  mode: 'preview', K: 'eg_preview_v1', cb: null, rcb: null,
+  read() { try { const r = JSON.parse(localStorage.getItem(this.K)); if (r && r.docs) return r; } catch (e) {} return { session: null, docs: {} }; },
+  write(s) { try { localStorage.setItem(this.K, JSON.stringify(s)); } catch (e) {} },
+  init(cb) { this.cb = cb; const s = this.read(); cb(s.session ? { uid: s.session, user: s.session } : null); },
+  previewLogin(user) { const s = this.read(); s.session = user; this.write(s); this.cb({ uid: user, user }); },
+  async logout() { const s = this.read(); s.session = null; this.write(s); this.cb(null); },
+  async load(uid) { return this.read().docs[uid] || null; },
+  async save(uid, data) { const s = this.read(); s.docs[uid] = data; this.write(s); },
+  stamp() { return Date.now(); },
+  subscribeStudents(cb) { this.rcb = cb; cb(Object.values(this.read().docs)); return () => { this.rcb = null; }; },
+  seedDemo() {
+    const s = this.read();
+    s.docs.hocvien1 = { user: 'hocvien1', units: { u4: { best: 8 }, u5: { best: 7 }, u6: { best: 6 }, u7: { best: 4 }, u9: { best: 5 }, u10: { best: 3 } }, tests: { t1: { best: 18 } }, wrong: ['u7:1', 'u7:5', 'u10:2', 't1:4', 't1:9'], updated: Date.now() };
+    s.docs.hocvien2 = { user: 'hocvien2', units: { u4: { best: 6 } }, tests: { t1: { best: 14 } }, wrong: ['t1:0', 't1:5', 't1:11', 'u4:7'], updated: Date.now() };
+    this.write(s);
+    if (this.rcb) this.rcb(Object.values(s.docs));
+  }
+};
+const Backend = CONFIGURED ? FirebaseBackend : PreviewBackend;
+let bootError = '';
+
+/* ===================== PHIÊN ĐĂNG NHẬP & LƯU TIẾN ĐỘ ===================== */
+let ME = null, S = null, ROSTER = {}, unsubRoster = null, authMsg = '';
+let view = { name: 'auth' };
+let saveTimer = null;
+
+function persist() { if (!ME || ME.role !== 'student') return; clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 500); }
+async function doSave() {
+  clearTimeout(saveTimer); saveTimer = null;
+  if (!ME || ME.role !== 'student') return;
+  try { await Backend.save(ME.uid, { user: ME.user, units: S.units, tests: S.tests, wrong: S.wrong, updated: Backend.stamp() }); }
+  catch (e) { toast('Chưa lưu được tiến độ lên máy chủ. Hãy kiểm tra mạng.'); }
+}
+async function doLogout() { if (saveTimer) await doSave(); try { await Backend.logout(); } catch (e) {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && saveTimer) doSave(); });
+
+async function onAuth(u) {
+  clearTimeout(saveTimer);
+  if (unsubRoster) { unsubRoster(); unsubRoster = null; }
+  if (!u) { ME = null; S = null; ROSTER = {}; view = { name: 'auth' }; render(); return; }
+  const user = String(u.user || '').toLowerCase();
+  const role = user === ADMIN_USER ? 'admin' : 'student';
+  const me = { uid: u.uid, user, role, name: (ACCOUNTS[user] && ACCOUNTS[user].name) || user };
+  try {
+    S = role === 'student' ? cleanP(await Backend.load(u.uid)) : emptyP();
+  } catch (e) {
+    /* Không cho vào nếu chưa tải được tiến độ, để tránh ghi đè tiến độ trên máy chủ bằng dữ liệu rỗng */
+    authMsg = 'Không tải được tiến độ học. Hãy kiểm tra mạng rồi đăng nhập lại.';
+    try { await Backend.logout(); } catch (_) {}
+    return;
+  }
+  ME = me;
+  if (role === 'admin') startRoster();
+  go({ name: role === 'admin' ? 'students' : 'dash' });
+}
+
+/* Danh sách học viên cho giáo viên: luôn hiện đủ các học viên đã khai báo trong ACCOUNTS, kể cả khi chưa đăng nhập lần nào */
+function buildRoster(docs) {
+  const R = {};
+  Object.keys(ACCOUNTS).filter(u => u !== ADMIN_USER).forEach(u => { R[u] = { u, n: ACCOUNTS[u].name, p: emptyP(), seen: false }; });
+  (docs || []).forEach(d => {
+    const u = String((d && d.user) || '').toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 20);
+    if (!u || u === ADMIN_USER) return;
+    R[u] = { u, n: (ACCOUNTS[u] && ACCOUNTS[u].name) || u, p: cleanP(d), seen: true };
+  });
+  return R;
+}
+function startRoster() {
+  ROSTER = buildRoster([]);
+  unsubRoster = Backend.subscribeStudents((docs, err) => {
+    if (err) { toast('Không tải được danh sách học viên. Kiểm tra lại quy tắc Firestore.'); return; }
+    ROSTER = buildRoster(docs);
+    if (ME && ME.role === 'admin' && (view.name === 'students' || view.name === 'student')) render();
+  });
+}
+const rosterArr = () => Object.values(ROSTER).sort((a, b) => a.n.localeCompare(b.n, 'vi'));
+
+/* Khóa phần: học viên phải vượt qua bài kiểm tra của phần trước. Giáo viên xem được tất cả. */
+function partLocked(pt) {
+  if (!ME || ME.role === 'admin') return false;
+  const i = PARTS.indexOf(pt);
+  if (i <= 0) return false;
+  const t = partTest(PARTS[i - 1]);
+  return !!t && !testPassed(S, t);
+}
+
+/* ===================== THÀNH PHẦN GIAO DIỆN DÙNG CHUNG ===================== */
+function wrongList(p) {
+  if (!p.wrong.length) return '<p class="muted">Không có câu nào cần ôn.</p>';
+  return p.wrong.map(id => {
+    const g = getQ(id);
+    const text = g.q.t + (g.q.sentence ? ' ' + stripTags(g.q.sentence) : '');
+    return `<div class="wq">${esc(text)}<small>${esc(g.u.title)}. Đáp án: ${esc(stripTags(g.q.o[g.q.a]))}</small></div>`;
+  }).join('');
+}
+function donut(done, prog, none) {
+  const n = done + prog + none, C = 2 * Math.PI * 48;
+  let off = 0;
+  const arc = (v, color) => {
+    if (!v) return '';
+    const len = v / n * C;
+    const out = `<circle cx="60" cy="60" r="48" fill="none" stroke-width="16" style="stroke:${color}" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)"/>`;
+    off += len; return out;
+  };
+  return `<svg class="donut" viewBox="0 0 120 120" role="img" aria-label="${done} bài hoàn thành, ${prog} bài đang học, ${none} bài chưa học">
+    <circle cx="60" cy="60" r="48" fill="none" stroke-width="16" style="stroke:var(--line)"/>
+    ${arc(done, 'var(--ok)')}${arc(prog, 'var(--accent)')}
+    <text class="dn" x="60" y="58" text-anchor="middle">${done}/${n}</text>
+    <text class="dl" x="60" y="75" text-anchor="middle">hoàn thành</text></svg>`;
+}
+function progressChart(p) {
+  const parts = PARTS.map(pt => ({ pt, its: itemsOf(pt) })).filter(x => x.its.length);
+  const c = { done: 0, prog: 0, none: 0 };
+  parts.forEach(x => x.its.forEach(it => c[itemState(p, it)]++));
+  return `
+    <div class="pg">${donut(c.done, c.prog, c.none)}
+      <ul class="legend">
+        <li><i class="k-done"></i>Hoàn thành: ${c.done} bài</li>
+        <li><i class="k-prog"></i>Đang học: ${c.prog} bài</li>
+        <li><i class="k-none"></i>Chưa học: ${c.none} bài</li>
+      </ul></div>
+    ${parts.map(({ pt, its }) => `
+      <h4 class="ph">Phần ${pt.no}. ${pt.title}</h4>
+      ${its.map(it => {
+        const isT = it.kind === 'test', n = it.o.quiz.length;
+        const st = isT ? p.tests[it.o.id] : p.units[it.o.id];
+        const b = st ? st.best : 0, state = itemState(p, it);
+        const tick = isT ? 80 : passMark(it.o) / n * 100;
+        return `<div class="ub"><div class="ub-h"><span>${isT ? 'Bài kiểm tra cuối phần' : it.o.title}</span><b>${st ? b + '/' + n : 'Chưa học'}</b></div>
+          <div class="meter"><i class="${state === 'done' ? 'good' : ''}" style="width:${b / n * 100}%"></i><s style="left:${tick}%"></s></div></div>`;
+      }).join('')}`).join('')}
+    <p class="muted sm" style="margin:12px 0 0">Vạch đen là mức hoàn thành: bài học đúng ít nhất 75% số câu, bài kiểm tra đúng trên 80%. Đang học là đã làm nhưng chưa đạt mức hoàn thành.</p>`;
+}
+
+/* ===================== ĐIỀU HƯỚNG ===================== */
+const $app = $('#app');
+function go(v) { view = v; render(); window.scrollTo(0, 0); }
+function navKey() {
+  return ({ dash: 'dash', lessons: 'lessons', part: 'lessons', unit: 'lessons', quiz: 'lessons', result: 'lessons', review: 'review', students: 'students', student: 'students', account: 'account' })[view.name] || 'dash';
+}
+function render() {
+  const authed = !!ME;
+  $('#auth').hidden = authed;
+  $('#shell').hidden = !authed;
+  if (!authed) { renderAuth(); return; }
+  if (ME.role !== 'admin' && (view.name === 'students' || view.name === 'student')) view = { name: 'dash' };
+  if (ME.role === 'admin' && (view.name === 'dash' || view.name === 'review')) view = { name: 'students' };
+  renderNav();
+  ({ dash: renderDash, lessons: renderLessons, part: renderPart, unit: renderUnit, quiz: renderQuiz, result: renderResult, review: renderReview, students: renderStudents, student: renderStudentDetail, account: renderAccount }[view.name] || renderDash)();
+}
+function renderNav() {
+  const admin = ME.role === 'admin', s = stats(S);
+  const cur = navKey();
+  const items = admin
+    ? [['students', 'Học viên'], ['lessons', 'Bài học'], ['account', 'Tài khoản']]
+    : [['dash', 'Tổng quan'], ['lessons', 'Bài học'], ['review', 'Ôn câu sai'], ['account', 'Tài khoản']];
+  const badge = k => (k === 'review' && s.wrong) ? `<i>${s.wrong}</i>` : '';
+  $('#side').innerHTML = `
+    <div class="brand">Easy Grammar<small>Ngữ pháp cho kỳ thi THPTQG</small></div>
+    <nav>${items.map(it => `<button class="nv" data-act="nav" data-arg="${it[0]}" ${cur === it[0] ? 'aria-current="page"' : ''}>${it[1]}${badge(it[0])}</button>`).join('')}</nav>
+    <div class="me"><b>${esc(ME.name)}</b><span>${admin ? 'Giáo viên' : 'Học viên'}</span>
+      <button class="btn ghost small" data-act="logout">Đăng xuất</button></div>`;
+  $('#bnav').innerHTML = items.map(it => `<button data-act="nav" data-arg="${it[0]}" ${cur === it[0] ? 'aria-current="page"' : ''}>${it[1]}${badge(it[0]) ? ' ' + badge(it[0]) : ''}</button>`).join('');
+  $('#mtop').innerHTML = `<div>Easy Grammar</div><span>${esc(ME.name)}</span>`;
+}
+
+/* ===================== ĐĂNG NHẬP ===================== */
+function authErr(msg) { const e = $('#autherr'); if (e) { e.textContent = msg; e.hidden = false; } }
+function renderAuth() {
+  const accs = Object.keys(ACCOUNTS);
+  $('#auth').innerHTML = `
+    <div class="auth-box">
+      <h1>Easy Grammar</h1>
+      <p>Học ngữ pháp tiếng Anh theo từng bài ngắn, có giải thích bằng tiếng Việt và theo dõi tiến độ.</p>
+      <div class="auth-card">
+        <div class="err" id="autherr" role="alert" hidden></div>
+        ${CONFIGURED ? `
+        <form data-form="login" autocomplete="on">
+          <label class="fld"><span>Tên đăng nhập</span><input type="text" name="user" autocomplete="username" autocapitalize="none" required></label>
+          <label class="fld"><span>Mật khẩu</span><input type="password" name="pw" autocomplete="current-password" required></label>
+          <button class="btn block" type="submit">Đăng nhập</button>
+        </form>` : `
+        <p style="margin:0 0 6px"><b>Chưa kết nối Firebase.</b></p>
+        <p class="muted" style="margin:0 0 14px">Dán cấu hình Firebase vào mục FIREBASE_CONFIG ở đầu phần script để đăng nhập thật. Trong lúc đó bạn có thể xem thử giao diện (dữ liệu chỉ lưu trong trình duyệt này).</p>
+        ${accs.map(u => `<button class="btn ghost block" style="margin-bottom:8px" data-act="previewlogin" data-arg="${u}">Xem thử với tài khoản ${esc(ACCOUNTS[u].name)}</button>`).join('')}`}
+      </div>
+    </div>`;
+  const m = authMsg || bootError; authMsg = '';
+  if (m) authErr(m);
+}
+function loginMsg(e) {
+  const c = (e && e.code) || '';
+  if (/invalid-credential|user-not-found|wrong-password|invalid-email/.test(c)) return 'Tên đăng nhập hoặc mật khẩu không đúng.';
+  if (c === 'auth/too-many-requests') return 'Đăng nhập sai quá nhiều lần. Hãy thử lại sau ít phút.';
+  if (c === 'auth/network-request-failed') return 'Không kết nối được mạng. Hãy kiểm tra internet rồi thử lại.';
+  return 'Không đăng nhập được. Vui lòng thử lại.';
+}
+async function doLogin(f) {
+  const user = f.elements.user.value.toLowerCase().replace(/\s+/g, '');
+  const pw = f.elements.pw.value;
+  if (!user || !pw) return authErr('Vui lòng nhập tên đăng nhập và mật khẩu.');
+  const btn = f.querySelector('button[type=submit]');
+  btn.disabled = true;
+  try { await Backend.login(user, pw); }
+  catch (e) { authErr(loginMsg(e)); btn.disabled = false; }
+}
+
+/* ===================== TỔNG QUAN HỌC VIÊN ===================== */
+const daysToExam = () => Math.round((new Date(EXAM.date + 'T00:00:00') - new Date(day() + 'T00:00:00')) / 864e5);
+const fmtDate = d => d.split('-').reverse().join('/');
+/* Mục tiếp theo cần làm: bài học hoặc bài kiểm tra đầu tiên chưa hoàn thành trong các phần đã mở */
+function nextItem() {
+  for (const pt of PARTS) {
+    if (partLocked(pt)) break;
+    for (const it of itemsOf(pt)) if (!itemDone(S, it)) return { it, pt };
+  }
+  return null;
+}
+function renderDash() {
+  const s = stats(S);
+  const pct = s.total ? Math.round(s.done / s.total * 100) : 0;
+  const nx = nextItem();
+  const left = daysToExam();
+  const examHTML = left > 0
+    ? `<p class="ex-n"><span class="mk">${left}</span> <small>ngày</small></p>
+       <p class="muted" style="margin:0">${left >= 7 ? `Còn khoảng ${Math.floor(left / 7)} tuần nữa. ` : ''}Ngày thi dự kiến: ${fmtDate(EXAM.date)}.</p>`
+    : left === 0
+    ? `<p class="ex-n">Hôm nay</p><p class="muted" style="margin:0">Hôm nay là ngày thi. Chúc bạn làm bài thật tốt.</p>`
+    : `<p class="ex-n">Đã qua</p><p class="muted" style="margin:0">Ngày thi ${fmtDate(EXAM.date)} đã qua.</p>`;
+  let nextHTML;
+  if (!nx) {
+    nextHTML = `<h3>Bạn đã hoàn thành toàn bộ khóa học</h3>
+      <p class="muted">Làm lại quiz để giữ nhịp, hoặc ôn các câu đã sai.</p>
+      <div class="btns"><button class="btn" data-act="nav" data-arg="lessons">Xem danh sách bài</button></div>`;
+  } else if (nx.it.kind === 'unit') {
+    const u = nx.it.o, st = S.units[u.id];
+    nextHTML = `<h3>Bài tiếp theo</h3>
+      <p class="nx"><span class="mk">${u.title}</span></p>
+      <p class="muted">Phần ${nx.pt.no}. ${nx.pt.title}. ${u.desc}</p>
+      <p class="muted">${st ? `Điểm tốt nhất ${st.best}/${u.quiz.length}. Cần đạt ${passMark(u)}/${u.quiz.length} để hoàn thành.` : 'Bạn chưa làm quiz bài này.'}</p>
+      <div class="btns"><button class="btn" data-act="unit" data-arg="${u.id}">Vào học</button></div>`;
+  } else {
+    const t = nx.it.o, st = S.tests[t.id], n = t.quiz.length;
+    nextHTML = `<h3>Bài kiểm tra tiếp theo</h3>
+      <p class="nx"><span class="mk">${t.title}</span></p>
+      <p class="muted">${n} câu. Cần đúng từ ${testNeed(n)}/${n} câu (trên 80%) ${PARTS[PARTS.indexOf(nx.pt) + 1] ? 'để mở khóa Phần ' + (nx.pt.no + 1) : 'để hoàn thành khóa học'}.</p>
+      <p class="muted">${st ? `Điểm tốt nhất ${st.best}/${n}.` : 'Bạn chưa làm bài kiểm tra này.'}</p>
+      <div class="btns"><button class="btn" data-act="starttest" data-arg="${t.id}">Làm bài kiểm tra</button></div>`;
+  }
+  $app.innerHTML = `
+    <h1 class="h1">Chào ${esc(ME.name)}</h1>
+    <div class="hero2">
+      <section class="pct-card" aria-label="Phần trăm hoàn thành khóa học">
+        <p class="pc-l">Hoàn thành khóa học</p>
+        <p class="pc-n">${pct}<span>%</span></p>
+        <div class="pc-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+        <p class="pc-s">${s.done}/${s.total} bài học và bài kiểm tra đã hoàn thành</p>
+      </section>
+      <section class="exam-card" aria-label="Đếm ngược ngày thi">
+        <h3>Đếm ngược ${EXAM.name}</h3>
+        ${examHTML}
+      </section>
+    </div>
+    <div class="row2">
+      <section class="sec hl">${nextHTML}</section>
+      <section class="sec">
+        <h3>Ôn câu sai</h3>
+        <p class="muted">${s.wrong ? `Bạn có ${s.wrong} câu cần ôn lại. Trả lời đúng thì câu đó được gỡ khỏi danh sách.` : 'Chưa có câu sai nào cần ôn.'}</p>
+        <button class="btn block" data-act="review" ${s.wrong ? '' : 'disabled'}>Ôn ngay</button>
+      </section>
+    </div>`;
+}
+
+/* ===================== BÀI HỌC THEO PHẦN ===================== */
+function renderLessons() {
+  $app.innerHTML = `
+    <div class="narrow">
+    <h1 class="h1">Bài học</h1>
+    <p class="lead">Chọn một phần để xem các bài nhỏ bên trong. Cuối mỗi phần có bài kiểm tra 20 câu: cần đúng trên 80% mới mở được phần tiếp theo.</p>
+    ${PARTS.map((pt, i) => {
+      if (partLocked(pt)) {
+        const prev = PARTS[i - 1];
+        return `<div class="row soon"><span class="num">${pt.no}</span>
+          <span><b>${pt.title}</b><small>Đã khóa. Vượt qua bài kiểm tra Phần ${prev.no} để mở phần này.</small></span>
+          <span class="meta"><span>Chưa mở</span></span></div>`;
+      }
+      const us = partUnits(pt), t = partTest(pt);
+      const done = us.filter(u => isDone(S, u)).length;
+      return `<button class="row" data-act="part" data-arg="${pt.id}"><span class="num">${pt.no}</span>
+        <span><b>${pt.title}</b><small>${pt.desc}</small></span>
+        <span class="meta">${t && testPassed(S, t) ? '<i class="chip done">Đã qua bài kiểm tra</i>' : ''}<span>${done}/${us.length} bài học hoàn thành</span></span></button>`;
+    }).join('')}
+    </div>`;
+}
+
+function renderPart() {
+  const pt = PARTS.find(x => x.id === view.id);
+  if (!pt || partLocked(pt)) return go({ name: 'lessons' });
+  const t = partTest(pt), next = PARTS[PARTS.indexOf(pt) + 1];
+  let testRow = '';
+  if (t) {
+    const n = t.quiz.length, st = S.tests[t.id], ok = testPassed(S, t);
+    testRow = `<button class="row test" data-act="starttest" data-arg="${t.id}">
+      <span class="num">KT</span>
+      <span><b>${t.title}</b><small>${n} câu. Cần đúng từ ${testNeed(n)}/${n} câu (trên 80%) ${next ? 'để mở khóa Phần ' + next.no : 'để hoàn thành khóa học'}. Nên học hết các bài trên trước khi làm.</small></span>
+      <span class="meta">${ok ? '<i class="chip done">Đã vượt qua</i>' : ''}<span>${st ? (ok ? '' : 'Chưa đạt. ') + 'Tốt nhất ' + st.best + '/' + n : 'Chưa làm'}</span></span></button>`;
+  }
+  $app.innerHTML = `
+    <div class="narrow">
+    <button class="back" data-act="nav" data-arg="lessons">Quay lại các phần</button>
+    <h1 class="h1">Phần ${pt.no}. ${pt.title}</h1>
+    <p class="lead">${pt.desc}</p>
+    ${partUnits(pt).map((u, i) => {
+      const st = S.units[u.id], done = isDone(S, u);
+      return `<button class="row" data-act="unit" data-arg="${u.id}">
+        <span class="num">${i + 1}</span>
+        <span><b>${u.title}</b><small>${u.desc}</small></span>
+        <span class="meta">${done ? '<i class="chip done">Đã hoàn thành</i>' : ''}<span>${st ? 'Tốt nhất ' + st.best + '/' + u.quiz.length : 'Chưa làm quiz'}</span></span>
+      </button>`;
+    }).join('')}
+    ${testRow}
+    </div>`;
+}
+
+function renderUnit() {
+  const u = U(view.id), pt = u && partOf(u.id);
+  if (!u || (pt && partLocked(pt))) return go({ name: 'lessons' });
+  const tabs = [['learn', 'Học nhanh'], ['practice', 'Luyện tập']];
+  let body = '';
+  if (view.tab === 'learn') {
+    body = u.learn.map(s => `
+      <article class="sec">
+        <h3 class="t2">${s.title}</h3>
+        <p class="formula"><span>${s.formula}</span></p>
+        <ul>${s.points.map(p => `<li>${p}</li>`).join('')}</ul>
+        <div class="ex">${s.ex.map(x => `<p><span class="en">${x[0]}</span><br><span class="vi">${x[1]}</span></p>`).join('')}</div>
+      </article>`).join('') +
+      `<aside class="traps"><h3>Lỗi hay gặp</h3><ul>${u.traps.map(t => `<li>${t}</li>`).join('')}</ul></aside>
+       ${u.src ? `<p class="muted sm" style="margin-top:12px">${u.src}</p>` : ''}
+       <div class="btns"><button class="btn" data-act="tab" data-arg="practice">Sang luyện tập</button></div>`;
+  } else {
+    const st = S.units[u.id];
+    body = `
+      <section class="sec">
+        <h3>Quiz ${u.quiz.length} câu</h3>
+        <p>Chọn đáp án, xem giải thích ngay sau mỗi câu. Câu sai được lưu lại để ôn ở mục Ôn câu sai.</p>
+        <p>${st ? `Điểm tốt nhất của bạn: <b>${st.best}/${u.quiz.length}</b>. Cần đạt ${passMark(u)}/${u.quiz.length} để hoàn thành bài.` : `Bạn chưa làm quiz bài này. Cần đạt ${passMark(u)}/${u.quiz.length} để hoàn thành bài.`}</p>
+        <button class="btn block" data-act="startquiz">${st ? 'Làm lại quiz' : 'Bắt đầu làm quiz'}</button>
+      </section>`;
+  }
+  $app.innerHTML = `
+    <div class="narrow">
+    <button class="back" data-act="${pt ? 'part' : 'nav'}" data-arg="${pt ? pt.id : 'lessons'}">${pt ? 'Quay lại Phần ' + pt.no : 'Quay lại danh sách bài'}</button>
+    <h2 class="u-title">${u.title}</h2>
+    <div class="tabs" role="tablist">
+      ${tabs.map(t => `<button class="tab" role="tab" aria-selected="${view.tab === t[0]}" data-act="tab" data-arg="${t[0]}">${t[1]}</button>`).join('')}
+    </div>
+    ${body}
+    </div>`;
+}
+
+function renderReview() {
+  const n = S.wrong.length;
+  $app.innerHTML = `
+    <div class="narrow">
+    <h1 class="h1">Ôn câu sai</h1>
+    <p class="lead">Các câu bạn từng làm sai (cả bài học và bài kiểm tra) được gom lại ở đây. Trả lời đúng thì câu đó được gỡ khỏi danh sách.</p>
+    ${n ? `<section class="sec"><h3>${n} câu cần ôn</h3>
+        ${S.wrong.map(id => { const g = getQ(id); return `<div class="wq">${esc(g.q.t + (g.q.sentence ? ' ' + stripTags(g.q.sentence) : ''))}<small>${esc(g.u.title)}</small></div>`; }).join('')}
+        <div class="btns"><button class="btn" data-act="review">Bắt đầu ôn</button></div></section>`
+    : `<div class="empty"><h3>Chưa có câu nào cần ôn</h3><p class="muted">Làm quiz ở một bài, câu nào sai sẽ xuất hiện ở đây.</p>
+        <div class="btns"><button class="btn" data-act="nav" data-arg="lessons">Đến danh sách bài</button></div></div>`}
+    </div>`;
+}
+
+/* ===================== QUIZ VÀ BÀI KIỂM TRA ===================== */
+/* Trộn thứ tự đáp án (trừ câu tìm lỗi sai, vì các đáp án gắn với đoạn gạch chân A-D) */
+const prep = q => {
+  if (q.sentence) return q;
+  const idx = shuffle(q.o.map((_, i) => i));
+  return Object.assign({}, q, { o: idx.map(i => q.o[i]), a: idx.indexOf(q.a) });
+};
+function startQuiz(mode, id) {
+  let list;
+  if (mode === 'unit') { const u = U(id); if (!u) return; list = u.quiz.map((q, i) => ({ id: `${id}:${i}`, q })); }
+  else if (mode === 'test') {
+    const t = TESTS.find(x => x.id === id); if (!t) return;
+    if (partLocked(testPart(t))) return go({ name: 'lessons' });
+    list = t.quiz.map((q, i) => ({ id: `${id}:${i}`, q }));
+  } else list = S.wrong.map(w => { const g = getQ(w); return g ? { id: w, q: g.q } : null; }).filter(Boolean);
+  if (!list.length) { toast('Chưa có câu nào để làm'); return; }
+  go({ name: 'quiz', mode, refId: id, items: shuffle(list).map(x => ({ id: x.id, q: prep(x.q) })), i: 0, score: 0, picked: null });
+}
+const quizTitle = v => v.mode === 'review' ? 'Ôn câu sai' : v.mode === 'test' ? TESTS.find(t => t.id === v.refId).title : U(v.refId).title;
+function renderQuiz() {
+  const v = view, it = v.items[v.i], q = it.q;
+  const done = v.picked !== null, right = done && v.picked === q.a;
+  $app.innerHTML = `
+    <div class="narrow">
+    <button class="back" data-act="quit">Thoát</button>
+    <p class="count">${quizTitle(v)}, câu ${v.i + 1} trên ${v.items.length}</p>
+    <div class="bar"><i style="width:${(v.i + (done ? 1 : 0)) / v.items.length * 100}%"></i></div>
+    <p class="qt">${q.t}</p>
+    ${q.sentence ? `<p class="sentence">${q.sentence}</p>` : ''}
+    <div class="opts">
+      ${q.o.map((o, k) => {
+        let cls = '';
+        if (done) cls = k === q.a ? 'ok' : (k === v.picked ? 'bad' : '');
+        return `<button class="opt ${cls}" data-act="pick" data-arg="${k}" ${done ? 'disabled' : ''}><span class="l">${LET[k]}</span><span>${o}</span></button>`;
+      }).join('')}
+    </div>
+    ${done ? `
+      <div class="why ${right ? 'ok' : 'bad'}" id="why">
+        <b>${right ? 'Chính xác' : `Chưa đúng, đáp án là ${LET[q.a]}`}</b><p>${q.e}</p>
+      </div>
+      <div class="btns"><button class="btn" data-act="nextq">${v.i + 1 < v.items.length ? 'Câu tiếp theo' : 'Xem kết quả'}</button></div>` : ''}
+    </div>`;
+  if (done) $('#why').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+function pick(k) {
+  const v = view;
+  if (v.picked !== null) return;
+  v.picked = k;
+  const it = v.items[v.i];
+  if (k === it.q.a) { v.score++; S.wrong = S.wrong.filter(x => x !== it.id); }
+  else if (!S.wrong.includes(it.id)) S.wrong.push(it.id);
+  persist(); renderQuiz();
+}
+function nextQ() {
+  const v = view;
+  if (v.i + 1 < v.items.length) { v.i++; v.picked = null; renderQuiz(); window.scrollTo(0, 0); return; }
+  if (v.mode === 'unit') {
+    const prev = S.units[v.refId];
+    S.units[v.refId] = { best: Math.max(prev ? prev.best : 0, v.score) };
+  } else if (v.mode === 'test') {
+    const prev = S.tests[v.refId];
+    S.tests[v.refId] = { best: Math.max(prev ? prev.best : 0, v.score) };
+  }
+  doSave();
+  go({ name: 'result', mode: v.mode, refId: v.refId, score: v.score, total: v.items.length });
+}
+function renderResult() {
+  const v = view;
+  if (v.mode === 'test') return renderTestResult();
+  const pct = v.score / v.total;
+  const msg = pct === 1 ? 'Trọn điểm. Bài này bạn nắm chắc rồi.'
+    : pct >= 0.75 ? 'Khá tốt. Xem lại các câu sai để chắc hơn.'
+    : pct >= 0.5 ? 'Tạm ổn. Đọc lại phần Lỗi hay gặp rồi làm lại quiz.'
+    : 'Chưa vững. Quay lại phần Học nhanh rồi làm lại quiz.';
+  const wrong = S.wrong.length;
+  const u = v.mode === 'unit' ? U(v.refId) : null;
+  const passed = u && isDone(S, u);
+  const pt = u ? partOf(u.id) : null;
+  $app.innerHTML = `
+    <div class="narrow"><section class="sec">
+      <h3>${v.mode === 'review' ? 'Kết quả ôn câu sai' : u.title}</h3>
+      <p class="score">${v.score}/${v.total}</p>
+      <p class="muted">${msg}${passed ? ' Bài này đã được tính hoàn thành.' : ''}</p>
+      <div class="btns">
+        ${u ? '<button class="btn" data-act="startquiz">Làm lại quiz</button>' : ''}
+        ${wrong ? `<button class="btn ${u ? 'ghost' : ''}" data-act="review">Ôn câu sai (${wrong})</button>` : ''}
+        ${u ? '<button class="btn ghost" data-act="tab" data-arg="learn">Xem lại bài học</button>' : ''}
+        ${pt ? `<button class="btn ghost" data-act="part" data-arg="${pt.id}">Quay lại Phần ${pt.no}</button>`
+          : `<button class="btn ghost" data-act="nav" data-arg="${ME.role === 'admin' ? 'students' : 'dash'}">${ME.role === 'admin' ? 'Về danh sách học viên' : 'Về tổng quan'}</button>`}
+      </div>
+    </section></div>`;
+}
+function renderTestResult() {
+  const v = view, t = TESTS.find(x => x.id === v.refId), pt = testPart(t);
+  const next = PARTS[PARTS.indexOf(pt) + 1];
+  const pass = testPass(v.score, v.total), need = testNeed(v.total);
+  const pct = Math.round(v.score / v.total * 100);
+  const wrong = S.wrong.length;
+  $app.innerHTML = `
+    <div class="narrow"><section class="sec">
+      <h3>${t.title}</h3>
+      <p class="score">${v.score}/${v.total}</p>
+      <p class="muted" style="margin-bottom:6px"><b>${pass ? 'Đạt' : 'Chưa đạt'}</b>: ${pct}% số câu đúng. Cần đúng từ ${need}/${v.total} câu (trên 80%).</p>
+      <p class="muted">${pass
+        ? (next ? `Bạn đã vượt qua bài kiểm tra Phần ${pt.no}. Phần ${next.no} đã được mở khóa.` : 'Bạn đã vượt qua bài kiểm tra cuối cùng và hoàn thành toàn bộ khóa học.')
+        : `Bạn cần làm lại để ${next ? 'mở khóa Phần ' + next.no : 'hoàn thành khóa học'}. Hãy ôn lại các câu sai và xem lại bài học rồi thử lại.`}</p>
+      <div class="btns">
+        ${pass && next ? `<button class="btn" data-act="part" data-arg="${next.id}">Sang Phần ${next.no}</button>` : ''}
+        ${!pass ? `<button class="btn" data-act="starttest" data-arg="${t.id}">Làm lại bài kiểm tra</button>` : ''}
+        ${wrong ? `<button class="btn ghost" data-act="review">Ôn câu sai (${wrong})</button>` : ''}
+        <button class="btn ghost" data-act="part" data-arg="${pt.id}">Quay lại Phần ${pt.no}</button>
+      </div>
+    </section></div>`;
+}
+
+/* ===================== GIÁO VIÊN: HỌC VIÊN ===================== */
+function renderStudents() {
+  const R = rosterArr();
+  $app.innerHTML = `
+    <div class="narrow">
+    <h1 class="h1">Học viên</h1>
+    <p class="lead">Chọn một học viên để xem tiến trình học và các câu đang sai.</p>
+    ${R.map(r => {
+      const s = stats(r.p);
+      return `<button class="srow" data-act="viewstudent" data-arg="${esc(r.u)}">
+        <span class="srow-h"><b>${esc(r.n)}</b></span>
+        <small>${r.seen ? `${s.done}/${s.total} bài hoàn thành, ${s.wrong} câu đang sai` : 'Chưa đăng nhập lần nào'}</small>
+      </button>`;
+    }).join('')}
+    ${Backend.mode === 'preview' ? '<div class="btns"><button class="btn ghost" data-act="seeddemo">Nạp dữ liệu mẫu để xem thử</button></div>' : ''}
+    </div>`;
+}
+function renderStudentDetail() {
+  const r = ROSTER[view.key];
+  if (!r) return go({ name: 'students' });
+  const nw = r.p.wrong.length;
+  $app.innerHTML = `
+    <div class="narrow">
+    <button class="back" data-act="nav" data-arg="students">Quay lại danh sách học viên</button>
+    <h1 class="h1">${esc(r.n)}</h1>
+    <p class="lead">Tên đăng nhập ${esc(r.u)}${r.seen ? '' : '. Học viên này chưa đăng nhập lần nào.'}</p>
+    <section class="sec"><h3>Tiến trình học</h3>${progressChart(r.p)}</section>
+    <section class="sec"><h3>Câu đang sai${nw ? ' (' + nw + ')' : ''}</h3>${wrongList(r.p)}</section>
+    </div>`;
+}
+
+/* ===================== TÀI KHOẢN ===================== */
+function renderAccount() {
+  $app.innerHTML = `
+    <div class="narrow">
+    <h1 class="h1">Tài khoản</h1>
+    <p class="lead">Thông tin đăng nhập của bạn.</p>
+    <section class="sec"><h3>Thông tin</h3>
+      <dl class="kv">
+        <div><dt>Họ tên</dt><dd>${esc(ME.name)}</dd></div>
+        <div><dt>Tên đăng nhập</dt><dd>${esc(ME.user)}</dd></div>
+        <div><dt>Loại tài khoản</dt><dd>${ME.role === 'admin' ? 'Giáo viên' : 'Học viên'}</dd></div>
+      </dl></section>
+    <section class="sec"><h3>Phiên đăng nhập</h3>
+      <div class="btns" style="margin-top:0"><button class="btn ghost" data-act="logout">Đăng xuất</button></div></section>
+    </div>`;
+}
+
+/* ===================== SỰ KIỆN ===================== */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  const a = el.dataset.act, arg = el.dataset.arg;
+  switch (a) {
+    case 'logout': doLogout(); break;
+    case 'previewlogin': Backend.previewLogin(arg); break;
+    case 'seeddemo': Backend.seedDemo(); toast('Đã nạp dữ liệu mẫu cho 2 học viên'); break;
+    case 'nav': go({ name: arg }); break;
+    case 'part': go({ name: 'part', id: arg }); break;
+    case 'unit': go({ name: 'unit', id: arg, tab: 'learn' }); break;
+    case 'tab': go({ name: 'unit', id: view.name === 'result' ? view.refId : view.id, tab: arg }); break;
+    case 'startquiz': startQuiz('unit', view.name === 'result' ? view.refId : view.id); break;
+    case 'starttest': startQuiz('test', arg); break;
+    case 'review': startQuiz('review'); break;
+    case 'pick': pick(+arg); break;
+    case 'nextq': nextQ(); break;
+    case 'quit':
+      if (confirm('Thoát? Các câu đã trả lời vẫn được lưu.')) {
+        doSave();
+        const v = view;
+        const pt = v.mode === 'unit' ? partOf(v.refId) : v.mode === 'test' ? testPart(TESTS.find(t => t.id === v.refId)) : null;
+        go(pt ? { name: 'part', id: pt.id } : { name: ME.role === 'admin' ? 'students' : 'review' });
+      }
+      break;
+    case 'viewstudent': go({ name: 'student', key: arg }); break;
+  }
+});
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.dataset.form === 'login') doLogin(e.target);
+});
+
+/* ===================== KHỞI ĐỘNG ===================== */
+if (CONFIGURED && typeof firebase === 'undefined') {
+  bootError = 'Không tải được Firebase. Hãy kiểm tra kết nối mạng rồi tải lại trang.';
+} else {
+  try { Backend.init(onAuth); }
+  catch (e) { bootError = 'Cấu hình Firebase chưa đúng. Hãy kiểm tra lại FIREBASE_CONFIG.'; }
+}
+render();
+</script>
+</body>
+</html>
