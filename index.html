@@ -1344,6 +1344,21 @@ function nextQ() {
   doSave();
   go({ name: 'result', mode: v.mode, refId: v.refId, score: v.score, total: v.items.length, wrongIds: v.wrongIds || [] });
 }
+/* mục học ngay sau một bài: bài kế trong phần, rồi bài kiểm tra, rồi phần sau */
+function nextAfterUnit(u) {
+  const pt = partOf(u.id);
+  if (!pt) return null;
+  const ids = pt.units, k = ids.indexOf(u.id);
+  if (k > -1 && k + 1 < ids.length) {
+    const nu = U(ids[k + 1]);
+    if (nu) return { kind: 'unit', o: nu, pt, label: 'Sang bài tiếp theo' };
+  }
+  const t = partTest(pt);
+  if (t) return { kind: 'test', o: t, pt, label: 'Làm bài kiểm tra phần này' };
+  const np = PARTS[PARTS.indexOf(pt) + 1];
+  if (np && !partLocked(np)) return { kind: 'part', o: np, pt, label: 'Sang Phần ' + np.no };
+  return null;
+}
 function renderResult() {
   const v = view;
   if (v.mode === 'test') return renderTestResult();
@@ -1356,14 +1371,18 @@ function renderResult() {
   const u = v.mode === 'unit' ? U(v.refId) : null;
   const passed = u && isDone(S, u);
   const pt = u ? partOf(u.id) : null;
+  /* chỉ gợi ý đi tiếp khi bài này đã đạt, tránh đẩy học viên qua bài mới khi chưa vững */
+  const nx = (u && passed) ? nextAfterUnit(u) : null;
   $app.innerHTML = `
     <div class="narrow"><section class="sec">
       <h3>${v.mode === 'review' ? 'Kết quả ôn câu sai' : u.title}</h3>
       <p class="score">${v.score}/${v.total}</p>
       <p class="muted">${msg}${passed ? ' Bài này đã được tính hoàn thành.' : ''}</p>
+      ${nx ? `<p class="muted">Tiếp theo: <b>${esc(nx.kind === 'part' ? 'Phần ' + nx.o.no + '. ' + nx.o.title : nx.o.title)}</b></p>` : ''}
       <div class="btns">
-        ${(v.wrongIds || []).length ? `<button class="btn" data-act="retrywrong">Làm lại ${v.wrongIds.length} câu sai này</button>` : ''}
-        ${u ? `<button class="btn ${(v.wrongIds || []).length ? 'ghost' : ''}" data-act="startquiz">Làm lại quiz</button>` : ''}
+        ${nx ? `<button class="btn" data-act="${nx.kind === 'unit' ? 'unit' : nx.kind === 'test' ? 'starttest' : 'part'}" data-arg="${nx.o.id}">${nx.label}</button>` : ''}
+        ${(v.wrongIds || []).length ? `<button class="btn ${nx ? 'ghost' : ''}" data-act="retrywrong">Làm lại ${v.wrongIds.length} câu sai này</button>` : ''}
+        ${u ? `<button class="btn ghost" data-act="startquiz">Làm lại quiz</button>` : ''}
         ${wrong ? `<button class="btn ${u ? 'ghost' : ''}" data-act="review">Ôn câu sai (${wrong})</button>` : ''}
         ${u ? '<button class="btn ghost" data-act="tab" data-arg="learn">Xem lại bài học</button>' : ''}
         ${u && ME.role === 'student' ? `<button class="btn ghost" data-act="ask" data-arg="${u.id}">Hỏi giáo viên về bài này</button>` : ''}
@@ -1387,7 +1406,8 @@ function renderTestResult() {
         ? (next ? `Bạn đã vượt qua bài kiểm tra Phần ${pt.no}. Phần ${next.no} đã được mở khóa.` : 'Bạn đã vượt qua bài kiểm tra cuối cùng và hoàn thành toàn bộ khóa học.')
         : `Hãy ôn lại các câu sai và xem lại bài học rồi thử lại.${next ? ` Sau ${TRY_UNLOCK} lần làm, Phần ${next.no} sẽ tự mở để bạn không bị kẹt (bạn đã làm ${testTries(S, t)} lần).` : ''}`}</p>
       <div class="btns">
-        ${pass && next ? `<button class="btn" data-act="part" data-arg="${next.id}">Sang Phần ${next.no}</button>` : ''}
+        ${pass && next ? `<button class="btn" data-act="part" data-arg="${next.id}">Sang Phần ${next.no}. ${esc(next.title)}</button>` : ''}
+        ${pass && !next ? `<button class="btn" data-act="nav" data-arg="dash">Về tổng quan</button>` : ''}
         ${!pass ? `<button class="btn" data-act="starttest" data-arg="${t.id}">Làm lại bài kiểm tra</button>` : ''}
         ${(v.wrongIds || []).length ? `<button class="btn ghost" data-act="retrywrong">Làm lại ${v.wrongIds.length} câu sai này</button>` : ''}
         ${wrong ? `<button class="btn ghost" data-act="review">Ôn câu sai (${wrong})</button>` : ''}
