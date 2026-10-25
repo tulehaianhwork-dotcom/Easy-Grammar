@@ -288,6 +288,25 @@ table.gt td:first-child{font-weight:600}
 .gi.yes{color:var(--ok)}
 .gi.ar{color:var(--ink-2);font-size:.9375rem}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+/* ---- bổ sung giao diện: tìm kiếm, thẻ lật, điểm yếu, tra cứu ---- */
+.srch{margin:0 0 14px}
+.srch input{width:100%;padding:12px 14px;border:1px solid var(--line,#dcdfe6);border-radius:10px;font:inherit;background:var(--card,#fff);color:inherit}
+.srch input:focus{outline:2px solid var(--acc,#3b5bdb);outline-offset:1px}
+.flash{border:1px solid var(--line,#dcdfe6);border-radius:14px;padding:26px 18px;min-height:150px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;cursor:pointer;background:var(--card,#fff);transition:border-color .15s}
+.flash:hover{border-color:var(--acc,#3b5bdb)}
+.flash .fq{font-size:1.1rem;font-weight:600;margin:0 0 10px}
+.flash .fa{font-size:1.35rem;font-weight:800;color:var(--acc,#3b5bdb);margin:0 0 8px}
+.flash .fe{font-size:.9rem;opacity:.75;margin:0}
+.flash.back{border-color:var(--acc,#3b5bdb)}
+.weak{margin:10px 0 14px}
+.wk{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:.9rem}
+.wk span{flex:0 0 42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wkbar{flex:1;height:8px;border-radius:5px;background:rgba(127,127,127,.18);overflow:hidden}
+.wkbar i{display:block;height:100%;background:var(--acc,#3b5bdb)}
+.wk b{flex:0 0 auto;font-size:.82rem;opacity:.8}
+.sec.rsm{border-left:3px solid var(--acc,#3b5bdb)}
+.why .btn.small{margin-top:10px}
+@media (max-width:640px){.wk span{flex:0 0 38%}}
 </style>
 </head>
 <body>
@@ -354,8 +373,10 @@ function toast(m, ms = 3200, to = null) {
 const U = id => UNITS.find(u => u.id === id);
 const passMark = u => Math.ceil(u.quiz.length * 0.75);        /* bài học: đúng từ 75% */
 const testSize = t => Math.min(TEST_SIZE, t.quiz.length);       /* số câu mỗi lần làm (bốc từ ngân hàng) */
-const testPass = (s, n) => s * 5 > n * 4;                      /* bài kiểm tra: đúng trên 80% */
-const testNeed = n => Math.floor(n * 4 / 5) + 1;               /* 20 câu: cần ít nhất 17 */
+const testPass = (s, n) => s * 10 >= n * 7;                     /* bài kiểm tra: đúng từ 70% */
+const testNeed = n => Math.ceil(n * 0.7);                      /* 20 câu: cần ít nhất 14 */
+const TRY_UNLOCK = 3;                                          /* làm đủ 3 lần thì mở khóa tạm phần sau */
+const testTries = (p, t) => (p.tests[t.id] && p.tests[t.id].tries) || 0;
 const partOf = id => PARTS.find(p => p.units.includes(id));
 const partUnits = pt => pt.units.map(U).filter(Boolean);
 const partTest = pt => TESTS.find(t => t.part === pt.id);
@@ -374,7 +395,7 @@ function cleanP(o) {
   const p = emptyP();
   if (!o || typeof o !== 'object') return p;
   UNITS.forEach(u => { const s = o.units && o.units[u.id]; if (s && Number.isFinite(+s.best)) p.units[u.id] = { best: clamp(Math.floor(+s.best), 0, u.quiz.length) }; });
-  TESTS.forEach(t => { const s = o.tests && o.tests[t.id]; if (s && Number.isFinite(+s.best)) p.tests[t.id] = { best: clamp(Math.floor(+s.best), 0, testSize(t)) }; });
+  TESTS.forEach(t => { const s = o.tests && o.tests[t.id]; if (s && Number.isFinite(+s.best)) p.tests[t.id] = { best: clamp(Math.floor(+s.best), 0, testSize(t)), tries: clamp(Math.floor(+s.tries) || 0, 0, 999) }; });
   if (Array.isArray(o.wrong)) p.wrong = [...new Set(o.wrong.filter(id => typeof id === 'string' && getQ(id)))];
   /* Ngày đã học được lưu trong cùng trường units (khóa _days) để không cần đổi quy tắc Firestore */
   const rawDays = o.units && o.units._days;
@@ -476,6 +497,39 @@ let view = { name: 'auth' };
 let saveTimer = null;
 
 function persist() { if (!ME || ME.role !== 'student') return; clearTimeout(saveTimer); saveTimer = setTimeout(doSave, 500); }
+
+/* ---- Bài đang làm dở: lưu trên máy để thoát giữa chừng không mất ---- */
+const RESKEY = () => 'eg_resume_' + (ME ? ME.user : '');
+function saveResume() {
+  if (!ME || view.name !== 'quiz' || view.mode === 'review') return;
+  try {
+    localStorage.setItem(RESKEY(), JSON.stringify({
+      mode: view.mode, refId: view.refId, i: view.i, score: view.score,
+      ids: view.items.map(x => x.id), at: Date.now()
+    }));
+  } catch (e) {}
+}
+function loadResume() {
+  try {
+    const r = JSON.parse(localStorage.getItem(RESKEY()) || 'null');
+    if (!r || !Array.isArray(r.ids) || !r.ids.length) return null;
+    if (Date.now() - (r.at || 0) > 7 * 86400000) { clearResume(); return null; }   /* quá 7 ngày thì bỏ */
+    if (r.i >= r.ids.length) { clearResume(); return null; }
+    return r;
+  } catch (e) { return null; }
+}
+function clearResume() { try { localStorage.removeItem(RESKEY()); } catch (e) {} }
+function resumeLabel(r) {
+  if (r.mode === 'test') { const t = TESTS.find(x => x.id === r.refId); return t ? t.title : 'Bài kiểm tra'; }
+  const u = U(r.refId); return u ? u.title : 'Quiz';
+}
+function doResume() {
+  const r = loadResume();
+  if (!r) { toast('Không còn bài làm dở nào'); return; }
+  const items = r.ids.map(id => { const g = getQ(id); return g ? { id, q: prep(g.q) } : null; }).filter(Boolean);
+  if (!items.length) { clearResume(); toast('Không khôi phục được bài làm dở'); return; }
+  go({ name: 'quiz', mode: r.mode, refId: r.refId, items, i: Math.min(r.i, items.length - 1), score: r.score || 0, picked: null, wrongIds: [] });
+}
 /* Ghi nhận hôm nay là ngày có học: khi mở một bài học hoặc trả lời một câu hỏi */
 function markStudied() {
   if (!ME || ME.role !== 'student') return;
@@ -492,7 +546,8 @@ async function doSave() {
   catch (e) { toast('Chưa lưu được tiến độ lên máy chủ. Hãy kiểm tra mạng.'); }
 }
 async function doLogout() { if (saveTimer) await doSave(); try { await Backend.logout(); } catch (e) {} }
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && saveTimer) doSave(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { saveResume(); if (saveTimer) doSave(); } });
+window.addEventListener('beforeunload', () => { saveResume(); });
 
 function stopSession() {
   if (unsubRoster) { unsubRoster(); unsubRoster = null; }
@@ -550,7 +605,16 @@ function partLocked(pt) {
   const i = PARTS.indexOf(pt);
   if (i <= 0) return false;
   const t = partTest(PARTS[i - 1]);
-  return !!t && !testPassed(S, t);
+  if (!t) return false;
+  if (testPassed(S, t)) return false;
+  return testTries(S, t) < TRY_UNLOCK;   /* làm đủ 3 lần vẫn được học tiếp, tránh bị kẹt */
+}
+/* phần được mở tạm do làm đủ số lần chứ chưa đạt điểm */
+function partSoftOpen(pt) {
+  const i = PARTS.indexOf(pt);
+  if (i <= 0) return false;
+  const t = partTest(PARTS[i - 1]);
+  return !!t && !testPassed(S, t) && testTries(S, t) >= TRY_UNLOCK;
 }
 
 /* ===================== CÂU HỎI CHO GIÁO VIÊN VÀ THÔNG BÁO ===================== */
@@ -690,7 +754,7 @@ function progressChart(p) {
 const $app = $('#app');
 function go(v) { view = v; render(); window.scrollTo(0, 0); }
 function navKey() {
-  return ({ dash: 'dash', lessons: 'lessons', part: 'lessons', unit: 'lessons', ask: 'lessons', quiz: 'lessons', result: 'lessons', review: 'review', qa: 'qa', questions: 'questions', students: 'students', student: 'students', account: 'account' })[view.name] || 'dash';
+  return ({ dash: 'dash', lessons: 'lessons', part: 'lessons', unit: 'lessons', ask: 'lessons', quiz: 'lessons', result: 'lessons', review: 'review', ref: 'ref', qa: 'qa', questions: 'questions', students: 'students', student: 'students', account: 'account' })[view.name] || 'dash';
 }
 function render() {
   const authed = !!ME;
@@ -700,14 +764,14 @@ function render() {
   if (ME.role !== 'admin' && ['students', 'student', 'questions'].includes(view.name)) view = { name: 'dash' };
   if (ME.role === 'admin' && ['dash', 'review', 'qa', 'ask'].includes(view.name)) view = { name: 'students' };
   renderNav();
-  ({ dash: renderDash, lessons: renderLessons, part: renderPart, unit: renderUnit, ask: renderAsk, quiz: renderQuiz, result: renderResult, review: renderReview, qa: renderQA, questions: renderQuestions, students: renderStudents, student: renderStudentDetail, account: renderAccount }[view.name] || renderDash)();
+  ({ dash: renderDash, lessons: renderLessons, part: renderPart, unit: renderUnit, ask: renderAsk, quiz: renderQuiz, result: renderResult, review: renderReview, ref: renderRef, qa: renderQA, questions: renderQuestions, students: renderStudents, student: renderStudentDetail, account: renderAccount }[view.name] || renderDash)();
 }
 function renderNav() {
   const admin = ME.role === 'admin', s = stats(S);
   const cur = navKey();
   const items = admin
-    ? [['students', 'Học viên'], ['questions', 'Câu hỏi'], ['lessons', 'Bài học'], ['account', 'Tài khoản']]
-    : [['dash', 'Tổng quan'], ['lessons', 'Bài học'], ['review', 'Ôn câu sai'], ['qa', 'Hỏi đáp'], ['account', 'Tài khoản']];
+    ? [['students', 'Học viên'], ['questions', 'Câu hỏi'], ['lessons', 'Bài học'], ['ref', 'Tra cứu'], ['account', 'Tài khoản']]
+    : [['dash', 'Tổng quan'], ['lessons', 'Bài học'], ['ref', 'Tra cứu'], ['review', 'Ôn câu sai'], ['qa', 'Hỏi đáp'], ['account', 'Tài khoản']];
   const count = k => k === 'review' ? s.wrong : k === 'qa' ? unreadReplies() : k === 'questions' ? pendingQ() : 0;
   const badge = k => count(k) ? `<i>${count(k)}</i>` : '';
   $('#side').innerHTML = `
@@ -806,6 +870,26 @@ function calendarHTML(days, forAdmin = false) {
       : `${isNow ? 'Tháng này' : 'Tháng ' + m} bạn đã học <b>${count}</b> ngày.${isNow ? ' ' + note : ''}`}</p>`;
 }
 
+/* gom câu sai theo phần để biết nên ôn mảng nào trước */
+function weakByPart() {
+  const cnt = {};
+  S.wrong.forEach(id => {
+    const g = getQ(id); if (!g) return;
+    const pt = partOf(g.u.id) || (g.u.part && PARTS.find(p => p.id === g.u.part));
+    if (!pt) return;
+    cnt[pt.id] = (cnt[pt.id] || 0) + 1;
+  });
+  return PARTS.map(p => ({ pt: p, n: cnt[p.id] || 0 })).filter(x => x.n).sort((a, b) => b.n - a.n);
+}
+function weakHTML() {
+  const w = weakByPart();
+  if (!w.length) return '';
+  const max = w[0].n;
+  return `<div class="weak"><p class="muted sm">Bạn đang sai nhiều nhất ở:</p>
+    ${w.slice(0, 3).map(x => `<div class="wk"><span>${esc(x.pt.title)}</span>
+      <div class="wkbar"><i style="width:${Math.round(x.n / max * 100)}%"></i></div>
+      <b>${x.n} câu</b></div>`).join('')}</div>`;
+}
 function renderDash() {
   const s = stats(S);
   const pct = s.total ? Math.round(s.done / s.total * 100) : 0;
@@ -844,35 +928,69 @@ function renderDash() {
         <p class="pc-s">${s.done}/${s.total} bài học và bài kiểm tra đã hoàn thành</p>
       </section>
       <section class="cal-card" aria-label="Lịch học">${calendarHTML(S.days)}</section>
+      ${(() => { const r = loadResume(); return r ? `<section class="sec rsm">
+        <h3>Bạn còn một bài đang làm dở</h3>
+        <p class="muted">${esc(resumeLabel(r))} — đang ở câu ${r.i + 1} trên ${r.ids.length}.</p>
+        <div class="btns"><button class="btn" data-act="resume">Làm tiếp</button>
+        <button class="btn ghost" data-act="dropresume">Bỏ qua</button></div>
+      </section>` : ''; })()}
       <section class="sec hl">${nextHTML}</section>
       <section class="sec rev">
         <h3>Ôn câu sai</h3>
         <p class="muted">${s.wrong ? `Bạn có ${s.wrong} câu cần ôn lại. Trả lời đúng thì câu đó được gỡ khỏi danh sách.` : 'Chưa có câu sai nào cần ôn.'}</p>
+        ${weakHTML()}
         <button class="btn block" data-act="review" ${s.wrong ? '' : 'disabled'}>Ôn ngay</button>
       </section>
     </div>`;
 }
 
 /* ===================== BÀI HỌC THEO PHẦN ===================== */
+let lessonQ = '';
+/* bỏ dấu tiếng Việt để tìm kiếm dễ trúng hơn */
+const noAcc = t => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+function searchUnits(q) {
+  const k = noAcc(q.trim());
+  if (!k) return [];
+  return UNITS.filter(u => noAcc(u.title + ' ' + u.desc).includes(k)).slice(0, 20);
+}
 function renderLessons() {
+  const hits = searchUnits(lessonQ);
+  const searchHTML = lessonQ.trim()
+    ? (hits.length
+        ? `<section class="sec"><h3>${hits.length} bài khớp với "${esc(lessonQ.trim())}"</h3>${hits.map(u => {
+            const pt = partOf(u.id), locked = pt && partLocked(pt);
+            return locked
+              ? `<div class="row soon"><span class="num">${pt.no}</span><span><b>${esc(u.title)}</b><small>Thuộc Phần ${pt.no}, chưa mở khóa.</small></span></div>`
+              : `<button class="row" data-act="unit" data-arg="${u.id}"><span class="num">${pt ? pt.no : ''}</span>
+                 <span><b>${esc(u.title)}</b><small>Phần ${pt ? pt.no + '. ' + pt.title : ''}</small></span>
+                 <span class="meta">${isDone(S, u) ? '<i class="chip done">Đã hoàn thành</i>' : ''}</span></button>`;
+          }).join('')}</section>`
+        : `<section class="sec"><p class="muted">Không tìm thấy bài nào khớp với "${esc(lessonQ.trim())}". Thử từ khóa ngắn hơn, ví dụ: thì, bị động, mệnh đề, so sánh.</p></section>`)
+    : '';
   $app.innerHTML = `
     <div class="narrow">
     <h1 class="h1">Bài học</h1>
-    <p class="lead">Chọn một phần để xem các bài nhỏ bên trong. Cuối mỗi phần có bài kiểm tra 20 câu (mỗi lần là một bộ câu khác nhau): cần đúng trên 80% mới mở được phần tiếp theo.</p>
+    <div class="srch"><input id="lsq" type="search" placeholder="Tìm bài: bị động, mệnh đề quan hệ, so sánh..." value="${esc(lessonQ)}" autocomplete="off"></div>
+    ${searchHTML}
+    <p class="lead">Chọn một phần để xem các bài nhỏ bên trong. Cuối mỗi phần có bài kiểm tra 20 câu (mỗi lần là một bộ câu khác nhau): cần đúng từ 70% mới mở được phần tiếp theo.</p>
     ${PARTS.map((pt, i) => {
       if (partLocked(pt)) {
-        const prev = PARTS[i - 1];
+        const prev = PARTS[i - 1], pt2 = partTest(prev), left = pt2 ? TRY_UNLOCK - testTries(S, pt2) : 0;
         return `<div class="row soon"><span class="num">${pt.no}</span>
-          <span><b>${pt.title}</b><small>Đã khóa. Vượt qua bài kiểm tra Phần ${prev.no} để mở phần này.</small></span>
+          <span><b>${pt.title}</b><small>Đã khóa. Vượt qua bài kiểm tra Phần ${prev.no} để mở, hoặc làm bài đó thêm ${left} lần nữa thì phần này tự mở.</small></span>
           <span class="meta"><span>Chưa mở</span></span></div>`;
       }
       const us = partUnits(pt), t = partTest(pt);
       const done = us.filter(u => isDone(S, u)).length;
       return `<button class="row" data-act="part" data-arg="${pt.id}"><span class="num">${pt.no}</span>
         <span><b>${pt.title}</b><small>${pt.desc}</small></span>
-        <span class="meta">${t && testPassed(S, t) ? '<i class="chip done">Đã qua bài kiểm tra</i>' : ''}<span>${done}/${us.length} bài học hoàn thành</span></span></button>`;
+        <span class="meta">${t && testPassed(S, t) ? '<i class="chip done">Đã qua bài kiểm tra</i>' : partSoftOpen(pt) ? '<i class="chip">Mở tạm</i>' : ''}<span>${done}/${us.length} bài học hoàn thành</span></span></button>`;
     }).join('')}
     </div>`;
+  const box = $('#lsq');
+  if (box) {
+    box.addEventListener('input', e => { lessonQ = e.target.value; renderLessons(); const b = $('#lsq'); if (b) { b.focus(); b.setSelectionRange(b.value.length, b.value.length); } });
+  }
 }
 
 function renderPart() {
@@ -901,6 +1019,44 @@ function renderPart() {
       </button>`;
     }).join('')}
     ${testRow}
+    </div>`;
+}
+
+/* ===================== TRA CỨU NHANH ===================== */
+/* gom các bảng đáng tra đi tra lại từ chính nội dung bài học */
+const REF = [
+  { u: 'n4', title: 'Động từ bất quy tắc', all: true },
+  { u: 'u22', title: 'Bảng 12 thì, dấu hiệu nhận biết và lỗi hay sai', all: true },
+  { u: 'n3', title: 'Quy tắc thêm -s/-es, -ed, -ing', all: true },
+  { u: 'u8', title: 'Tiền tố và hậu tố (word form)', all: true },
+  { u: 'c2', title: 'V-ing hay to V', all: true },
+  { u: 'u29', title: 'Bảng câu bị động theo thì', all: true },
+  { u: 'c5', title: 'Lùi thì và đổi trạng ngữ (câu tường thuật)', all: true },
+  { u: 'c1', title: 'So sánh bất quy tắc', all: true }
+];
+let refOpen = null;
+function refTables(r) {
+  const u = U(r.u);
+  if (!u) return [];
+  const tbls = u.blocks.filter(b => b.t === 'tbl');
+  return r.all ? tbls : r.pick.map(i => tbls[i]).filter(Boolean);
+}
+function renderRef() {
+  $app.innerHTML = `
+    <div class="narrow">
+    <h1 class="h1">Tra cứu nhanh</h1>
+    <p class="lead">Các bảng cần tra đi tra lại được gom về đây. Bấm vào một mục để mở bảng, bấm lần nữa để đóng.</p>
+    ${REF.map(r => {
+      const open = refOpen === r.u, u = U(r.u);
+      return `<section class="sec">
+        <button class="row" data-act="refopen" data-arg="${r.u}" style="width:100%">
+          <span class="num">${open ? '−' : '+'}</span>
+          <span><b>${esc(r.title)}</b><small>${open ? 'Bấm để đóng' : 'Bấm để xem bảng'}</small></span>
+        </button>
+        ${open ? `<div class="gl">${refTables(r).map(b => tblHTML(b.rows)).join('')}</div>
+          ${u && !partLocked(partOf(u.id)) ? `<div class="btns"><button class="btn ghost small" data-act="gounit" data-arg="${u.id}">Mở bài học đầy đủ</button></div>` : ''}` : ''}
+      </section>`;
+    }).join('')}
     </div>`;
 }
 
@@ -937,12 +1093,35 @@ function blocksHTML(blocks) {
     : b.t === 'box' ? boxHTML(b) : '').join('');
 }
 
+let cardI = 0, cardFlip = false;
 function renderUnit() {
   const u = U(view.id), pt = u && partOf(u.id);
   if (!u || (pt && partLocked(pt))) return go({ name: 'lessons' });
-  const tabs = [['learn', 'Học nhanh'], ['practice', 'Luyện tập']];
+  const tabs = [['learn', 'Học nhanh'], ['cards', 'Lật thẻ'], ['practice', 'Luyện tập']];
   let body = '';
-  if (view.tab === 'learn') {
+  if (view.tab === 'cards') {
+    const list = u.quiz.filter(q => !q.sentence);   /* câu tìm lỗi sai không hợp dạng thẻ */
+    if (!list.length) {
+      body = `<section class="sec"><p class="muted">Bài này chưa có thẻ phù hợp. Hãy sang phần Luyện tập.</p></section>`;
+    } else {
+      const i = Math.min(cardI, list.length - 1), c = list[i];
+      body = `
+        <section class="sec card-sec">
+          <p class="count">Thẻ ${i + 1} trên ${list.length}</p>
+          <div class="bar"><i style="width:${(i + 1) / list.length * 100}%"></i></div>
+          <div class="flash ${cardFlip ? 'back' : ''}" data-act="cardflip">
+            <p class="fq">${esc(c.t)}</p>
+            ${cardFlip ? `<p class="fa">${esc(c.o[c.a])}</p><p class="fe">${esc(c.e)}</p>`
+                       : `<p class="muted sm">Nghĩ ra đáp án rồi bấm vào thẻ để lật</p>`}
+          </div>
+          <div class="btns">
+            <button class="btn ghost" data-act="cardprev" ${i === 0 ? 'disabled' : ''}>Thẻ trước</button>
+            <button class="btn" data-act="cardnext" ${i + 1 >= list.length ? 'disabled' : ''}>Thẻ tiếp theo</button>
+          </div>
+          <div class="btns"><button class="btn ghost small" data-act="tab" data-arg="practice">Sang luyện tập</button></div>
+        </section>`;
+    }
+  } else if (view.tab === 'learn') {
     body = `<div class="gl">${blocksHTML(u.blocks)}</div>
        ${ME.role === 'student' ? `<aside class="ask"><div><b>Còn thắc mắc về bài này?</b><span>Hỏi giáo viên, câu trả lời sẽ hiện trong mục Hỏi đáp.</span></div><button class="btn ghost small" data-act="ask" data-arg="${u.id}">Hỏi giáo viên</button></aside>` : ''}
        <div class="btns"><button class="btn" data-act="tab" data-arg="practice">Sang luyện tập</button></div>`;
@@ -988,8 +1167,14 @@ const prep = q => {
   const idx = shuffle(q.o.map((_, i) => i));
   return Object.assign({}, q, { o: idx.map(i => q.o[i]), a: idx.indexOf(q.a) });
 };
-function startQuiz(mode, id) {
+function startQuiz(mode, id, fixed) {
   let list;
+  if (fixed) {   /* danh sách câu chỉ định sẵn: làm lại câu sai của lượt vừa rồi */
+    list = fixed.map(w => { const g = getQ(w); return g ? { id: w, q: g.q } : null; }).filter(Boolean);
+    if (!list.length) { toast('Không còn câu nào để làm lại'); return; }
+    go({ name: 'quiz', mode: 'retry', refId: id, items: shuffle(list).map(x => ({ id: x.id, q: prep(x.q) })), i: 0, score: 0, picked: null, wrongIds: [] });
+    return;
+  }
   if (mode === 'unit') { const u = U(id); if (!u) return; list = u.quiz.map((q, i) => ({ id: `${id}:${i}`, q })); }
   else if (mode === 'test') {
     const t = TESTS.find(x => x.id === id); if (!t) return;
@@ -997,9 +1182,12 @@ function startQuiz(mode, id) {
     list = shuffle(t.quiz.map((q, i) => ({ id: `${id}:${i}`, q }))).slice(0, testSize(t));   /* bốc ngẫu nhiên từ ngân hàng */
   } else list = S.wrong.map(w => { const g = getQ(w); return g ? { id: w, q: g.q } : null; }).filter(Boolean);
   if (!list.length) { toast('Chưa có câu nào để làm'); return; }
-  go({ name: 'quiz', mode, refId: id, items: shuffle(list).map(x => ({ id: x.id, q: prep(x.q) })), i: 0, score: 0, picked: null });
+  clearResume();
+  go({ name: 'quiz', mode, refId: id, items: shuffle(list).map(x => ({ id: x.id, q: prep(x.q) })), i: 0, score: 0, picked: null, wrongIds: [] });
 }
-const quizTitle = v => v.mode === 'review' ? 'Ôn câu sai' : v.mode === 'test' ? TESTS.find(t => t.id === v.refId).title : U(v.refId).title;
+const quizTitle = v => v.mode === 'review' ? 'Ôn câu sai' : v.mode === 'retry' ? 'Làm lại câu sai' : v.mode === 'test' ? TESTS.find(t => t.id === v.refId).title : U(v.refId).title;
+/* unit chứa một câu hỏi, dùng cho nút Xem lại bài ngay dưới lời giải */
+const unitOfQ = id => { const m = /^([A-Za-z][A-Za-z0-9_-]*):/.exec(id || ''); return m ? UNITS.find(x => x.id === m[1]) : null; };
 function renderQuiz() {
   const v = view, it = v.items[v.i], q = it.q;
   const done = v.picked !== null, right = done && v.picked === q.a;
@@ -1020,6 +1208,7 @@ function renderQuiz() {
     ${done ? `
       <div class="why ${right ? 'ok' : 'bad'}" id="why">
         <b>${right ? 'Chính xác' : `Chưa đúng, đáp án là ${LET[q.a]}`}</b><p>${q.e}</p>
+        ${!right && unitOfQ(it.id) ? `<button class="btn ghost small" data-act="gounit" data-arg="${unitOfQ(it.id).id}">Xem lại bài: ${esc(unitOfQ(it.id).title)}</button>` : ''}
       </div>
       <div class="btns"><button class="btn" data-act="nextq">${v.i + 1 < v.items.length ? 'Câu tiếp theo' : 'Xem kết quả'}</button></div>` : ''}
     </div>`;
@@ -1031,22 +1220,30 @@ function pick(k) {
   v.picked = k;
   const it = v.items[v.i];
   markStudied();
-  if (k === it.q.a) { v.score++; S.wrong = S.wrong.filter(x => x !== it.id); }
-  else if (!S.wrong.includes(it.id)) S.wrong.push(it.id);
-  persist(); renderQuiz();
+  if (k === it.q.a) {
+    v.score++;
+    S.wrong = S.wrong.filter(x => x !== it.id);
+    v.wrongIds = (v.wrongIds || []).filter(x => x !== it.id);
+  } else {
+    if (!S.wrong.includes(it.id)) S.wrong.push(it.id);
+    v.wrongIds = v.wrongIds || [];
+    if (!v.wrongIds.includes(it.id)) v.wrongIds.push(it.id);
+  }
+  saveResume(); persist(); renderQuiz();
 }
 function nextQ() {
   const v = view;
-  if (v.i + 1 < v.items.length) { v.i++; v.picked = null; renderQuiz(); window.scrollTo(0, 0); return; }
+  if (v.i + 1 < v.items.length) { v.i++; v.picked = null; saveResume(); renderQuiz(); window.scrollTo(0, 0); return; }
+  clearResume();
   if (v.mode === 'unit') {
     const prev = S.units[v.refId];
     S.units[v.refId] = { best: Math.max(prev ? prev.best : 0, v.score) };
   } else if (v.mode === 'test') {
     const prev = S.tests[v.refId];
-    S.tests[v.refId] = { best: Math.max(prev ? prev.best : 0, v.score) };
+    S.tests[v.refId] = { best: Math.max(prev ? prev.best : 0, v.score), tries: ((prev && prev.tries) || 0) + 1 };
   }
   doSave();
-  go({ name: 'result', mode: v.mode, refId: v.refId, score: v.score, total: v.items.length });
+  go({ name: 'result', mode: v.mode, refId: v.refId, score: v.score, total: v.items.length, wrongIds: v.wrongIds || [] });
 }
 function renderResult() {
   const v = view;
@@ -1066,7 +1263,8 @@ function renderResult() {
       <p class="score">${v.score}/${v.total}</p>
       <p class="muted">${msg}${passed ? ' Bài này đã được tính hoàn thành.' : ''}</p>
       <div class="btns">
-        ${u ? '<button class="btn" data-act="startquiz">Làm lại quiz</button>' : ''}
+        ${(v.wrongIds || []).length ? `<button class="btn" data-act="retrywrong">Làm lại ${v.wrongIds.length} câu sai này</button>` : ''}
+        ${u ? `<button class="btn ${(v.wrongIds || []).length ? 'ghost' : ''}" data-act="startquiz">Làm lại quiz</button>` : ''}
         ${wrong ? `<button class="btn ${u ? 'ghost' : ''}" data-act="review">Ôn câu sai (${wrong})</button>` : ''}
         ${u ? '<button class="btn ghost" data-act="tab" data-arg="learn">Xem lại bài học</button>' : ''}
         ${u && ME.role === 'student' ? `<button class="btn ghost" data-act="ask" data-arg="${u.id}">Hỏi giáo viên về bài này</button>` : ''}
@@ -1085,13 +1283,14 @@ function renderTestResult() {
     <div class="narrow"><section class="sec">
       <h3>${t.title}</h3>
       <p class="score">${v.score}/${v.total}</p>
-      <p class="muted" style="margin-bottom:6px"><b>${pass ? 'Đạt' : 'Chưa đạt'}</b>: ${pct}% số câu đúng. Cần đúng từ ${need}/${v.total} câu (trên 80%).</p>
+      <p class="muted" style="margin-bottom:6px"><b>${pass ? 'Đạt' : 'Chưa đạt'}</b>: ${pct}% số câu đúng. Cần đúng từ ${need}/${v.total} câu (70%).</p>
       <p class="muted">${pass
         ? (next ? `Bạn đã vượt qua bài kiểm tra Phần ${pt.no}. Phần ${next.no} đã được mở khóa.` : 'Bạn đã vượt qua bài kiểm tra cuối cùng và hoàn thành toàn bộ khóa học.')
-        : `Bạn cần làm lại để ${next ? 'mở khóa Phần ' + next.no : 'hoàn thành khóa học'}. Hãy ôn lại các câu sai và xem lại bài học rồi thử lại.`}</p>
+        : `Hãy ôn lại các câu sai và xem lại bài học rồi thử lại.${next ? ` Sau ${TRY_UNLOCK} lần làm, Phần ${next.no} sẽ tự mở để bạn không bị kẹt (bạn đã làm ${testTries(S, t)} lần).` : ''}`}</p>
       <div class="btns">
         ${pass && next ? `<button class="btn" data-act="part" data-arg="${next.id}">Sang Phần ${next.no}</button>` : ''}
         ${!pass ? `<button class="btn" data-act="starttest" data-arg="${t.id}">Làm lại bài kiểm tra</button>` : ''}
+        ${(v.wrongIds || []).length ? `<button class="btn ghost" data-act="retrywrong">Làm lại ${v.wrongIds.length} câu sai này</button>` : ''}
         ${wrong ? `<button class="btn ghost" data-act="review">Ôn câu sai (${wrong})</button>` : ''}
         <button class="btn ghost" data-act="part" data-arg="${pt.id}">Quay lại Phần ${pt.no}</button>
       </div>
@@ -1298,7 +1497,7 @@ document.addEventListener('click', e => {
     case 'sendq': submitQuestion(arg); break;
     case 'replyq': sendReply(arg); break;
     case 'qtab': go({ name: 'questions', tab: arg }); break;
-    case 'unit': markStudied(); go({ name: 'unit', id: arg, tab: 'learn' }); break;
+    case 'unit': markStudied(); cardI = 0; cardFlip = false; go({ name: 'unit', id: arg, tab: 'learn' }); break;
     case 'calprev': calMonth = shiftMonth(calMonth, -1); render(); break;
     case 'calnext': calMonth = shiftMonth(calMonth, 1); render(); break;
     case 'tab': go({ name: 'unit', id: view.name === 'result' ? view.refId : view.id, tab: arg }); break;
@@ -1308,13 +1507,26 @@ document.addEventListener('click', e => {
     case 'pick': pick(+arg); break;
     case 'nextq': nextQ(); break;
     case 'quit':
-      if (confirm('Thoát? Các câu đã trả lời vẫn được lưu.')) {
-        doSave();
+      if (confirm('Thoát? Các câu đã trả lời vẫn được lưu và bạn có thể làm tiếp sau.')) {
+        saveResume(); doSave();
         const v = view;
         const pt = v.mode === 'unit' ? partOf(v.refId) : v.mode === 'test' ? testPart(TESTS.find(t => t.id === v.refId)) : null;
         go(pt ? { name: 'part', id: pt.id } : { name: ME.role === 'admin' ? 'students' : 'review' });
       }
       break;
+    case 'gounit': {
+      const gu = U(arg), gp = gu && partOf(gu.id);
+      if (gu && !(gp && partLocked(gp))) { markStudied(); go({ name: 'unit', id: arg, tab: 'learn' }); }
+      else toast('Bài này thuộc phần chưa mở khóa');
+      break;
+    }
+    case 'retrywrong': startQuiz('retry', view.refId, view.wrongIds || []); break;
+    case 'resume': doResume(); break;
+    case 'dropresume': clearResume(); toast('Đã bỏ bài làm dở'); render(); break;
+    case 'refopen': refOpen = (refOpen === arg ? null : arg); render(); break;
+    case 'cardflip': cardFlip = !cardFlip; render(); break;
+    case 'cardnext': cardI++; cardFlip = false; render(); break;
+    case 'cardprev': cardI = Math.max(0, cardI - 1); cardFlip = false; render(); break;
     case 'viewstudent': calMonth = day().slice(0, 7); go({ name: 'student', key: arg }); break;
   }
 });
